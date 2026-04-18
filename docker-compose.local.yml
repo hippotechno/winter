@@ -1,0 +1,65 @@
+services:
+  winter-app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        BUILD_DATE: ${BUILD_DATE:-local}
+        VCS_REF: ${VCS_REF:-local}
+    image: ${LOCAL_IMAGE_NAME:-winter-app:local}
+    container_name: ${APP_CONTAINER_NAME:-winter-app-local}
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    environment:
+      LOG_CHANNEL: stderr
+    expose:
+      - "80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - winter_storage:/var/www/html/storage
+      - winter_cache:/var/www/html/bootstrap/cache
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: ${DB_CONTAINER_NAME:-winter-pg-local}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-winter}
+      POSTGRES_USER: ${DB_USERNAME:-winter}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-winter}
+    ports:
+      - "${DB_EXPOSE_PORT:-5433}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: ${WEB_CONTAINER_NAME:-winter-web-local}
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    depends_on:
+      - winter-app
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${HTTP_BIND_PORT:-80}:80"
+      - "${BIND_IP:-127.0.0.1}:${HTTPS_BIND_PORT:-443}:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  winter_storage:
+  winter_cache:
+  pg_data:
+  caddy_data:
+  caddy_config:
