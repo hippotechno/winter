@@ -2,7 +2,7 @@
     admin off
 }
 
-{$LOCAL_DOMAIN} {
+{$LOCAL_DOMAIN}, *.{$LOCAL_DOMAIN} {
     tls internal
     encode zstd gzip
     reverse_proxy winter-app:80
