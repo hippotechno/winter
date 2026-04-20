@@ -60,9 +60,6 @@ class Extension extends TwigExtension
     /**
      * Returns an array of filters this extension provides.
      */
-        /**
-     * Returns an array of filters this extension provides.
-     */
     public function getFilters(): array
     {
         $options = [
@@ -70,13 +67,12 @@ class Extension extends TwigExtension
         ];
 
         return [
-            new TwigSimpleFilter('wn_page', [$this, 'pageFilter'], $options),
-            new TwigSimpleFilter('page', [$this, 'multiSitePageFilter'], $options),
-            new TwigSimpleFilter('wn_theme', [$this, 'themeFilter'], $options),
-            new TwigSimpleFilter('theme', [$this, 'multiSiteThemeFilter'], $options),
+            new TwigSimpleFilter('page', [$this, 'pageFilter'], $options),
+            new TwigSimpleFilter('theme', [$this, 'themeFilter'], $options),
         ];
     }
-/**
+
+    /**
      * Returns an array of token parsers this extension provides.
      */
     public function getTokenParsers(): array
@@ -176,28 +172,10 @@ class Extension extends TwigExtension
     /**
      * Generates Vite tags via Laravel's Vite Object.
      */
-        // HIPPO_VITE_START
-    /**
-     * Generates Vite tags via Laravel's Vite Object.
-     */
-    public function viteFunction(array $entrypoints, string $package, ?string $buildDirectory = null): ?\Illuminate\Support\HtmlString
+    public function viteFunction(array $entrypoints, string $package, ?string $buildDirectory = null): \Illuminate\Support\HtmlString
     {
-        $html = Vite::tags($entrypoints, $package, $buildDirectory);
-
-        $html = preg_replace_callback(
-            '/\b(?:src|href)="([^"]+)"/i',
-            function ($matches) {
-                $fullUrl = $matches[1];
-                $newUrl  = \Hippo\Core\Classes\MultiSiteHelper::replaceHostInUrl($fullUrl);
-                return str_replace($fullUrl, $newUrl, $matches[0]);
-            },
-            $html
-        );
-
-        return new \Illuminate\Support\HtmlString($html);
+        return Vite::tags($entrypoints, $package, $buildDirectory);
     }
-    // HIPPO_VITE_END
-
 
     /**
      * Generates Vite React Refresh tags via Laravel's Vite Object.
@@ -251,23 +229,5 @@ class Extension extends TwigExtension
     public function endBlock($append = true): void
     {
         Block::endBlock($append);
-    }
-
-    /**
-     * Multi-site page filter: build full url và thay host bằng MultiSiteHelper.
-     */
-    public function multiSitePageFilter($name, $parameters = [], $routePersistence = true): ?string
-    {
-        $fullUrl = $this->controller->pageUrl($name, $parameters, $routePersistence);
-        return \Hippo\Core\Classes\MultiSiteHelper::replaceHostInUrl($fullUrl);
-    }
-
-    /**
-     * Multi-site theme filter: build full url và thay host bằng MultiSiteHelper.
-     */
-    public function multiSiteThemeFilter($url): string
-    {
-        $fullUrl = $this->controller->themeUrl($url);
-        return \Hippo\Core\Classes\MultiSiteHelper::replaceHostInUrl($fullUrl);
     }
 }
