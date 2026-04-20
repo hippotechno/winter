@@ -16,6 +16,7 @@ services:
       - .env.local
     environment:
       LOG_CHANNEL: stderr
+      CHOWN_STORAGE: "false"
     expose:
       - "80"
     depends_on:
@@ -23,7 +24,6 @@ services:
         condition: service_healthy
     volumes:
       - ${APP_CODE_PATH:-.}:/var/www/html
-      - winter_storage:/var/www/html/storage
       - winter_cache:/var/www/html/bootstrap/cache
 
   postgres:
@@ -66,7 +66,6 @@ secrets:
     environment: GITHUB_TOKEN
 
 volumes:
-  winter_storage:
   winter_cache:
   pg_data:
   caddy_data:

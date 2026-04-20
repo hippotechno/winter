@@ -11,7 +11,10 @@ mkdir -p \
     storage/logs \
     bootstrap/cache
 
-chown -R www-data:www-data storage bootstrap/cache
+if [ "${CHOWN_STORAGE:-true}" = "true" ]; then
+    chown -R www-data:www-data storage
+fi
+chown -R www-data:www-data bootstrap/cache
 
 if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
     echo "RUN_MIGRATIONS=true => chạy php artisan winter:up"
