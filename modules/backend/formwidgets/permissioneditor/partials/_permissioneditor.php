@@ -1,156 +1,236 @@
+<style>
+    .perm-tools {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .perm-tools .uk-input {
+        width: 100%;
+    }
+    .perm-tools > .uk-flex-1 {
+        min-width: 220px;
+    }
+    .permissioneditor.is-dirty .uk-select {
+        border-color: #f59e0b;
+    }
+</style>
+
 <div class="permissioneditor <?= $this->previewMode ? 'control-disabled' : '' ?>" <?= $field->getAttributes() ?>>
-    <table>
-        <?php
-        $firstTab = true;
-        $globalIndex = 0;
-        $checkboxMode = !($this->mode === 'radio');
-        ?>
-        <?php foreach ($permissions as $tab => $tabPermissions): ?>
-            <tr class="section">
-                <th class="tab"><?= e(trans($tab)) ?></th>
+    <div class="perm-tools uk-margin-small uk-flex uk-flex-middle uk-flex-wrap">
+        <div class="uk-flex-1 uk-margin-small-right">
+            <input
+                type="text"
+                class="uk-input"
+                placeholder="Tìm plugin..."
+                data-plugin-search>
+        </div>
+        <div class="uk-flex-1 uk-margin-small-right">
+            <select class="uk-select" data-plugin-select <?= $this->previewMode ? 'disabled' : '' ?>>
+                <?php foreach ($pluginOptions as $code => $label): ?>
+                    <option value="<?= e($code) ?>" <?= $selectedPlugin === $code ? 'selected' : '' ?>>
+                        <?= e($label) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </div>
 
-                <th class="permission-type"><?= $firstTab ? e(trans('backend::lang.user.allow')) : '' ?></th>
-
-                <?php if ($this->mode === 'radio'): ?>
-                    <th class="permission-type"><?= $firstTab ? e(trans('backend::lang.user.inherit')) : '' ?></th>
-                    <th class="permission-type"><?= $firstTab ? e(trans('backend::lang.user.deny')) : '' ?></th>
-                <?php endif; ?>
-
-                <th></th>
-            </tr>
-
-            <?php
-            $lastIndex = count($tabPermissions) - 1;
-            ?>
-            <?php foreach ($tabPermissions as $index => $permission): ?>
-
-                <?php
-                $globalIndex++;
-
-                switch ($this->mode) {
-                    case 'radio':
-                        $permissionValue = array_key_exists($permission->code, $permissionsData)
-                            ? $permissionsData[$permission->code]
-                            : 0;
-                        break;
-                    case 'switch':
-                        $isChecked = !((int) @$permissionsData[$permission->code] === -1);
-                        break;
-                    case 'checkbox':
-                    default:
-                        $isChecked = array_key_exists($permission->code, $permissionsData);
-                        break;
-                }
-
-                $allowId = $this->getId('permission-' . $globalIndex . '-allow');
-                $inheritId = $this->getId('permission-' . $globalIndex . '-inherit');
-                $denyId = $this->getId('permission-' . $globalIndex . '-deny');
-                ?>
-
-                <tr class="<?= $lastIndex == $index ? 'last-section-row' : '' ?>
-                        <?= $checkboxMode ? 'mode-checkbox' : 'mode-radio' ?>
-                        <?= $checkboxMode && !$isChecked ? 'disabled' : '' ?>
-                        <?= !$checkboxMode && $permissionValue == -1 ? 'disabled' : '' ?>
-                    ">
-
-                    <td class="permission-name">
-                        <?= e(trans($permission->label)) ?>
-                        <?php if ($permission->comment): ?>
-                            <span
-                                class="text-info wn-icon-circle-info"
-                                data-toggle="tooltip"
-                                title="<?= e(trans($permission->comment)) ?>"
-                                tabindex="0"
-                                role="img"
-                                aria-label="<?= e(trans($permission->comment)) ?>"
-                            ></span>
-                        <?php endif; ?>
-                    </td>
-
-                    <?php if ($this->mode === 'radio'): ?>
-                        <td class="permission-value">
-                            <div class="radio custom-radio">
-                                <input
-                                    id="<?= $allowId ?>"
-                                    name="<?= e($baseFieldName) ?>[<?= e($permission->code) ?>]"
-                                    value="1"
-                                    type="radio"
-                                    <?= $permissionValue == 1 ? 'checked="checked"' : '' ?>
-                                    data-radio-color="green"
-                                >
-
-                                <label for="<?= $allowId ?>"><span>Allow</span></label>
-                            </div>
-                        </td>
-                        <td class="permission-value">
-                            <div class="radio custom-radio">
-                                <input
-                                    id="<?= $inheritId ?>"
-                                    name="<?= e($baseFieldName) ?>[<?= e($permission->code) ?>]"
-                                    value="0"
-                                    <?= $permissionValue == 0 ? 'checked="checked"' : '' ?>
-                                    type="radio"
-                                >
-
-                                <label for="<?= $inheritId ?>"><span>Inherit</span></label>
-                            </div>
-                        </td>
-                        <td class="permission-value">
-                            <div class="radio custom-radio">
-                                <input
-                                    id="<?= $denyId ?>"
-                                    name="<?= e($baseFieldName) ?>[<?= e($permission->code) ?>]"
-                                    value="-1"
-                                    <?= $permissionValue == -1 ? 'checked="checked"' : '' ?>
-                                    type="radio"
-                                    data-radio-color="red"
-                                >
-
-                                <label for="<?= $denyId ?>"><span>Deny</span></label>
-                            </div>
-                        </td>
-                    <?php elseif ($this->mode === 'switch'): ?>
-                        <td class="permission-value">
-                            <input
-                                type="hidden"
-                                name="<?= e($baseFieldName) ?>[<?= e($permission->code) ?>]"
-                                value="-1"
-                            >
-
-                            <label class="custom-switch">
-                                <input
-                                    id="<?= $allowId ?>"
-                                    name="<?= e($baseFieldName) ?>[<?= e($permission->code) ?>]"
-                                    value="1"
-                                    type="checkbox"
-                                    <?= $isChecked ? 'checked="checked"' : '' ?>
-                                >
-                                <span><span><?= e(trans('backend::lang.list.column_switch_true')) ?></span><span><?= e(trans('backend::lang.list.column_switch_false')) ?></span></span>
-                                <a class="slide-button"></a>
-                            </label>
-                        </td>
-                    <?php else: ?>
-                        <td class="permission-value">
-                            <div class="checkbox custom-checkbox">
-                                <input
-                                    id="<?= $allowId ?>"
-                                    name="<?= e($baseFieldName) ?>[<?= e($permission->code) ?>]"
-                                    value="1"
-                                    type="checkbox"
-                                    <?= $isChecked ? 'checked="checked"' : '' ?>
-                                >
-
-                                <label for="<?= $allowId ?>"><span>Allow</span></label>
-                            </div>
-                        </td>
-                    <?php endif; ?>
-
-                    <td></td>
-                </tr>
-            <?php endforeach ?>
-
-            <?php $firstTab = false; ?>
-        <?php endforeach ?>
-    </table>
+    <div id="<?= $this->getId('permissionsContainer') ?>" data-permission-container>
+        <?= $this->makePartial('permissioneditor_table'); ?>
+    </div>
     <div class="permissions-overlay"></div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const editor = document.querySelector(".permissioneditor");
+        const container = editor?.querySelector("[data-permission-container]");
+        const pluginSelect = editor?.querySelector("[data-plugin-select]");
+        const pluginSearch = editor?.querySelector("[data-plugin-search]");
+        const handler = "<?= $this->getEventHandler('onLoadPermissions') ?>";
+
+        if (!editor || !container || !pluginSelect) {
+            return;
+        }
+
+        let dirty = false;
+        let currentPlugin = pluginSelect.value;
+        const markDirty = () => {
+            dirty = true;
+            editor.classList.add("is-dirty");
+        };
+
+        const resetDirty = () => {
+            dirty = false;
+            editor.classList.remove("is-dirty");
+        };
+
+        const applySearchFilter = (input) => {
+            const filter = input.value.toLowerCase();
+            const tab = input.closest(".uk-accordion-content");
+
+            tab?.querySelectorAll("tr[data-perm-item]").forEach((row) => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(filter) ? "" : "none";
+            });
+        };
+
+        const toggleRows = (rows, mode, turnOn) => {
+            if (mode === "radio") {
+                rows.forEach((r) => {
+                    const allow = r.querySelector('input[value="1"]');
+                    const inherit = r.querySelector('input[value="0"]');
+                    const deny = r.querySelector('input[value="-1"]');
+                    if (!allow || !inherit || !deny) return;
+
+                    if (allow.checked) inherit.checked = true;
+                    else if (inherit.checked) deny.checked = true;
+                    else if (deny.checked) allow.checked = true;
+                    else inherit.checked = true;
+                });
+                return;
+            }
+
+            const checkboxes = [...rows].flatMap((r) => [...r.querySelectorAll('input[type="checkbox"]')]);
+            const shouldTurnOn = typeof turnOn === "boolean"
+                ? turnOn
+                : checkboxes.filter((c) => c.checked).length <= checkboxes.length / 2;
+
+            checkboxes.forEach((c) => { c.checked = shouldTurnOn; });
+        };
+
+        const bindTableEvents = () => {
+            const tableWrap = container.querySelector("[data-permission-table]");
+            if (!tableWrap) {
+                return;
+            }
+            const mode = tableWrap.dataset.permissionMode;
+
+            tableWrap.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach((input) => {
+                input.addEventListener("change", markDirty, { once: false });
+            });
+
+            tableWrap.querySelectorAll("[data-permission-search]").forEach((searchBox) => {
+                searchBox.addEventListener("keyup", (e) => applySearchFilter(e.target), { once: false });
+            });
+
+            tableWrap.addEventListener("click", (e) => {
+                const groupBtn = e.target.closest("[data-group-toggle]");
+                if (groupBtn) {
+                    const group = groupBtn.dataset.group;
+                    const rows = tableWrap.querySelectorAll(`tr[data-perm-group="${group}"]`);
+                    toggleRows(rows, mode);
+                    markDirty();
+                    return;
+                }
+
+                const actionToggle = e.target.closest("[data-action-toggle]");
+                if (actionToggle) {
+                    e.preventDefault();
+                    const action = actionToggle.dataset.action;
+                    const rows = tableWrap.querySelectorAll(`tr[data-perm-action="${action}"]`);
+                    toggleRows(rows, mode);
+                    markDirty();
+                }
+            });
+
+            const searchInput = tableWrap.querySelector("[data-permission-search]");
+            if (searchInput) {
+                applySearchFilter(searchInput);
+            }
+        };
+
+        const handleGlobalToggle = () => {
+            const tableWrap = container.querySelector("[data-permission-table]");
+            if (!tableWrap) return;
+            const mode = tableWrap.dataset.permissionMode;
+            const rows = tableWrap.querySelectorAll("tr[data-perm-item]");
+            const checkboxes = tableWrap.querySelectorAll('input[type="checkbox"]');
+
+            let turnOn = true;
+            if (mode !== "radio" && checkboxes.length) {
+                const checkedCount = [...checkboxes].filter((c) => c.checked).length;
+                turnOn = checkedCount <= checkboxes.length / 2;
+            }
+
+            toggleRows(rows, mode, turnOn);
+            markDirty();
+        };
+
+        const loadPlugin = (pluginCode) => {
+            if (!window.jQuery || typeof $.request !== "function") {
+                return;
+            }
+            container.classList.add("loading");
+            $.request(handler, {
+                data: { plugin: pluginCode },
+                success: (data) => {
+                    if (data && data.result) {
+                        container.innerHTML = data.result;
+                        currentPlugin = pluginCode;
+                        resetDirty();
+                        bindTableEvents();
+
+                        const globalToggleBtn = editor.querySelector("[data-global-toggle]");
+                        if (globalToggleBtn) {
+                            globalToggleBtn.addEventListener("click", handleGlobalToggle);
+                        }
+                    }
+                },
+                complete: () => container.classList.remove("loading"),
+            });
+        };
+
+        if (window.jQuery) {
+            $(document).on("ajaxSuccess", (_evt, context) => {
+                if (context && context.handler && /onSave/i.test(context.handler)) {
+                    resetDirty();
+                }
+            });
+        }
+
+        if (pluginSelect) {
+            pluginSelect.addEventListener("change", () => {
+                const nextPlugin = pluginSelect.value;
+                if (dirty && !confirm("Bạn có thay đổi chưa lưu. Chuyển plugin sẽ bỏ qua thay đổi hiện tại.")) {
+                    pluginSelect.value = currentPlugin;
+                    return;
+                }
+                loadPlugin(nextPlugin);
+            });
+        }
+
+        if (pluginSearch) {
+            pluginSearch.addEventListener("input", () => {
+                const term = pluginSearch.value.toLowerCase();
+                const options = [...pluginSelect.options];
+                let hasMatch = false;
+
+                options.forEach((opt) => {
+                    const hay = `${opt.textContent} ${opt.value}`.toLowerCase();
+                    const match = hay.includes(term);
+                    opt.hidden = !match;
+                    opt.disabled = !match;
+                    opt.style.display = match ? "" : "none";
+                    if (match) {
+                        hasMatch = true;
+                    }
+                });
+
+                if (!hasMatch) {
+                    options.forEach((opt) => {
+                        opt.hidden = false;
+                        opt.disabled = false;
+                        opt.style.display = "";
+                    });
+                }
+            });
+        }
+
+        const initialToggleBtn = editor.querySelector("[data-global-toggle]");
+        if (initialToggleBtn) {
+            initialToggleBtn.addEventListener("click", handleGlobalToggle);
+        }
+
+        bindTableEvents();
+    });
+</script>

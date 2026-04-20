@@ -80,11 +80,19 @@ class PermissionEditor extends FormWidgetBase
             $permissionsData = [];
         }
 
+        $allPermissions = $this->getFilteredPermissions();
+        $pluginOptions = $this->getPluginOptions($allPermissions);
+        $selectedPlugin = $this->getSelectedPlugin($pluginOptions);
+        $pluginPermissions = $this->filterPermissionsByPlugin($allPermissions, $selectedPlugin);
+
         $this->vars['mode'] = $this->mode;
-        $this->vars['permissions'] = $this->getFilteredPermissions();
+        $this->vars['permissions'] = $pluginPermissions;
         $this->vars['baseFieldName'] = $this->getFieldName();
         $this->vars['permissionsData'] = $permissionsData;
         $this->vars['field'] = $this->formField;
+        $this->vars['pluginOptions'] = $pluginOptions;
+        $this->vars['selectedPlugin'] = $selectedPlugin;
+        $this->vars['pluginPermissionCodes'] = $this->listPermissionCodes($pluginPermissions);
     }
 
     /**
@@ -92,11 +100,7 @@ class PermissionEditor extends FormWidgetBase
      */
     public function getSaveValue($value)
     {
-        if ($this->user->isSuperUser()) {
-            return is_array($value) ? $value : [];
-        }
-
-        return $this->getSaveValueSecure($value);
+        return $this->processSaveValue($value, !$this->user->isSuperUser());
     }
 
     /**
@@ -117,25 +121,58 @@ class PermissionEditor extends FormWidgetBase
      */
     protected function getSaveValueSecure($value)
     {
+        return $this->processSaveValue($value, true);
+    }
+
+    /**
+     * Returns a safely parsed set of permissions, ensuring the user cannot elevate
+     * their own permissions or permissions of another user above their own.
+     *
+     * @param string $value
+     * @param bool $enforceAccess
+     * @return array
+     */
+    protected function processSaveValue($value, bool $enforceAccess = true)
+    {
+        $pluginCode = null;
+        if (is_array($value) && array_key_exists('_plugin', $value)) {
+            $pluginCode = $value['_plugin'];
+            unset($value['_plugin']);
+        }
+
         $newPermissions = is_array($value) ? array_map('intval', $value) : [];
+        $pluginCode = $pluginCode ?? post($this->getFieldName() . '_plugin');
+
+        $existingPermissions = $this->model->permissions;
+        if (!is_array($existingPermissions)) {
+            $existingPermissions = [];
+        }
+
+        if ($pluginCode) {
+            $allowedForPlugin = $this->listPermissionCodes(
+                $this->getFilteredPermissions($pluginCode)
+            );
+
+            foreach ($allowedForPlugin as $permissionCode) {
+                unset($existingPermissions[$permissionCode]);
+            }
+        }
 
         if (!empty($newPermissions)) {
-            $existingPermissions = $this->model->permissions ?: [];
-
-            $allowedPermissions = array_map(function ($permissionObject) {
-                return $permissionObject->code;
-            }, array_flatten($this->getFilteredPermissions()));
+            $allowedPermissions = $enforceAccess
+                ? array_map(function ($permissionObject) {
+                    return $permissionObject->code;
+                }, array_flatten($this->getFilteredPermissions($pluginCode ?: null)))
+                : array_keys($newPermissions);
 
             foreach ($newPermissions as $permission => $code) {
                 if (in_array($permission, $allowedPermissions)) {
                     $existingPermissions[$permission] = $code;
                 }
             }
-
-            $newPermissions = $existingPermissions;
         }
 
-        return $newPermissions;
+        return $existingPermissions;
     }
 
     /**
@@ -143,7 +180,7 @@ class PermissionEditor extends FormWidgetBase
      *
      * @return array The permissions that the logged-in user does have access to ['permission-tab' => $arrayOfAllowedPermissionObjects]
      */
-    protected function getFilteredPermissions()
+    protected function getFilteredPermissions($onlyPlugin = null)
     {
         $permissions = BackendAuth::listTabbedPermissions();
 
@@ -153,6 +190,10 @@ class PermissionEditor extends FormWidgetBase
                     (
                         is_array($this->availablePermissions) &&
                         !in_array($permission->code, $this->availablePermissions)
+                    ) ||
+                    (
+                        $onlyPlugin &&
+                        $this->extractPluginCode($permission->code) !== $onlyPlugin
                     )) {
                     unset($permissionsArray[$index]);
                 }
@@ -162,10 +203,140 @@ class PermissionEditor extends FormWidgetBase
                 unset($permissions[$tab]);
             }
             else {
-                $permissions[$tab] = $permissionsArray;
+                $permissions[$tab] = array_values($permissionsArray);
             }
         }
 
         return $permissions;
+    }
+
+    /**
+     * AJAX handler: returns permission table for a single plugin.
+     */
+    public function onLoadPermissions()
+    {
+        $permissionsData = $this->formField->getValueFromData($this->model);
+        if (!is_array($permissionsData)) {
+            $permissionsData = [];
+        }
+
+        $allPermissions = $this->getFilteredPermissions();
+        $pluginOptions = $this->getPluginOptions($allPermissions);
+        $selectedPlugin = post('plugin');
+        if (!$selectedPlugin || !array_key_exists($selectedPlugin, $pluginOptions)) {
+            $selectedPlugin = $this->getSelectedPlugin($pluginOptions);
+        }
+
+        $pluginPermissions = $this->filterPermissionsByPlugin($allPermissions, $selectedPlugin);
+
+        $this->vars['mode'] = $this->mode;
+        $this->vars['permissions'] = $pluginPermissions;
+        $this->vars['baseFieldName'] = $this->getFieldName();
+        $this->vars['permissionsData'] = $permissionsData;
+        $this->vars['field'] = $this->formField;
+        $this->vars['selectedPlugin'] = $selectedPlugin;
+        $this->vars['pluginPermissionCodes'] = $this->listPermissionCodes($pluginPermissions);
+
+        return [
+            'result' => $this->makePartial('permissioneditor_table'),
+        ];
+    }
+
+    /**
+     * Builds list of plugin options from available permissions.
+     */
+    protected function getPluginOptions(array $permissions): array
+    {
+        $plugins = [];
+
+        foreach ($permissions as $tabPermissions) {
+            foreach ($tabPermissions as $permission) {
+                $pluginCode = $this->extractPluginCode($permission->code);
+                if (!array_key_exists($pluginCode, $plugins)) {
+                    $plugins[$pluginCode] = $this->formatPluginLabel($pluginCode);
+                }
+            }
+        }
+
+        ksort($plugins);
+
+        return $plugins;
+    }
+
+    /**
+     * Returns the selected plugin code.
+     */
+    protected function getSelectedPlugin(array $pluginOptions): ?string
+    {
+        $requested = post($this->getFieldName() . '_plugin');
+        if ($requested && array_key_exists($requested, $pluginOptions)) {
+            return $requested;
+        }
+
+        return count($pluginOptions) ? array_key_first($pluginOptions) : null;
+    }
+
+    /**
+     * Filters permissions array down to a single plugin.
+     */
+    protected function filterPermissionsByPlugin(array $permissions, ?string $pluginCode): array
+    {
+        if (!$pluginCode) {
+            return [];
+        }
+
+        $filtered = [];
+        foreach ($permissions as $tab => $permissionSet) {
+            foreach ($permissionSet as $permission) {
+                if ($this->extractPluginCode($permission->code) !== $pluginCode) {
+                    continue;
+                }
+                $filtered[$tab][] = $permission;
+            }
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * Extracts plugin code from permission code.
+     */
+    protected function extractPluginCode(string $permissionCode): string
+    {
+        $parts = explode('.', $permissionCode);
+
+        if (count($parts) >= 2) {
+            return $parts[0] . '.' . $parts[1];
+        }
+
+        return 'other';
+    }
+
+    /**
+     * Formats plugin code for dropdown display.
+     */
+    protected function formatPluginLabel(string $pluginCode): string
+    {
+        $parts = explode('.', $pluginCode);
+        $parts = array_map(function ($part) {
+            return ucwords(str_replace('_', ' ', $part));
+        }, $parts);
+
+        return implode(' / ', $parts);
+    }
+
+    /**
+     * Returns a flat list of permission codes from a permission array.
+     */
+    protected function listPermissionCodes(array $permissions): array
+    {
+        $codes = [];
+        foreach ($permissions as $tabPermissions) {
+            foreach ($tabPermissions as $permission) {
+                $codes[] = $permission->code;
+            }
+        }
+
+        return $codes;
     }
 }
