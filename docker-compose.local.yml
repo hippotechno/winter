@@ -6,6 +6,7 @@ services:
       args:
         BUILD_DATE: ${BUILD_DATE:-local}
         VCS_REF: ${VCS_REF:-local}
+        GITHUB_TOKEN: ${GITHUB_TOKEN:-}
     image: ${LOCAL_IMAGE_NAME:-winter-app:local}
     container_name: ${APP_CONTAINER_NAME:-winter-app-local}
     restart: unless-stopped
@@ -19,6 +20,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
+      - ${APP_CODE_PATH:-.}:/var/www/html
       - winter_storage:/var/www/html/storage
       - winter_cache:/var/www/html/bootstrap/cache
 

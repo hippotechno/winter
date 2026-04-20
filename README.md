@@ -26,6 +26,61 @@ Mục tiêu vận hành:
 - `.env.local.example`: biến môi trường local
 - `.env.runtime.example`: biến môi trường runtime
 
+## Biến môi trường (quan trọng)
+
+Repo này có 3 lớp env, mỗi lớp dùng cho mục đích khác nhau:
+
+1. `.env`: env của ứng dụng Winter/Laravel khi chạy trực tiếp.
+2. `.env.local`: env cho Docker local (`docker-compose.local.yml`).
+3. `.env.runtime`: env cho server/runtime (`docker-compose.runtime.yml`).
+
+Nguyên tắc dùng:
+- Local dev: ưu tiên `.env.local`.
+- Deploy server: dùng `.env.runtime`.
+- Không commit file env thật (`.env`, `.env.local`, `.env.runtime`) lên git.
+
+### Tạo env đúng cách
+
+```bash
+# local docker
+cp .env.local.example .env.local
+
+# runtime server
+cp .env.runtime.example .env.runtime
+
+# app env (nếu chưa có)
+cp -n .env.example .env
+```
+
+### Các biến bắt buộc cho local
+
+Trong `.env.local`, cần kiểm tra tối thiểu:
+- `APP_URL`, `LOCAL_DOMAIN`
+- `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+- `HTTP_BIND_PORT`, `HTTPS_BIND_PORT`, `DB_EXPOSE_PORT`
+- `APP_KEY`
+
+### `GITHUB_TOKEN` dùng thế nào
+
+Build local hiện dùng HTTPS + token cho private repo.
+
+Lưu ý quan trọng:
+- `GITHUB_TOKEN` là **build arg**, Docker Compose lấy từ shell env hoặc file `.env` ở root.
+- `env_file: .env.local` của service **không tự động cấp** giá trị cho `build.args`.
+
+Cách chắc nhất khi build:
+
+```bash
+GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx \
+docker compose -f docker-compose.local.yml build --no-cache winter-app
+```
+
+Nếu muốn khỏi gõ mỗi lần, export trước:
+
+```bash
+export GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx
+```
+
 ## 1) Chạy local (khuyên dùng trước)
 
 Domain local mặc định: `https://tulutala-local.test`
@@ -35,6 +90,12 @@ Domain local mặc định: `https://tulutala-local.test`
 ```bash
 cp .env.local.example .env.local
 ```
+
+Sau khi copy, sửa ngay các biến:
+- `APP_URL=https://tulutala-local.test`
+- `LOCAL_DOMAIN=tulutala-local.test`
+- `DB_*` theo database local của bạn
+- `APP_KEY` (nếu trống thì tạo ở Bước 5)
 
 ### Bước 2: map domain vào hosts
 

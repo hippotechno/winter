@@ -1,4 +1,4 @@
-# Composer ignores
+# Composer ignores Local Hippo core config
 vendor
 composer.phar
 composer.lock
@@ -36,3 +36,5 @@ node_modules
 
 # Ignore generated public directory from `winter:mirror public`
 public
+
+.env.local
