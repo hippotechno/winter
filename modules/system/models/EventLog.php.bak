@@ -240,7 +240,7 @@ class EventLog extends Model
             'context' => 'Web',
             'backend' => method_exists(app(), 'runningInBackend') ? app()->runningInBackend() : false,
             'testing' => app()->runningUnitTests(),
-            'url' => \Hippo\Core\Classes\MultiSiteHelper::getCurrentUrlByMultiSite(),
+            'url' => app('url')->current(),
             'method' => app('request')->method(),
             'env' => app()->environment(),
             'ip' => app('request')->ip(),
