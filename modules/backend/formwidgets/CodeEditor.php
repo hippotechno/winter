@@ -27,7 +27,7 @@ class CodeEditor extends FormWidgetBase
     public $showGutter = true;
 
     /**
-     * @var boolean Indicates whether the the word wrapping is enabled.
+     * @var string|bool Word wrapping mode (off, fluid, 40, 80). bool is supported for backward compatibility.
      */
     public $wordWrap = true;
 
@@ -170,7 +170,7 @@ class CodeEditor extends FormWidgetBase
     public function prepareVars()
     {
         $this->vars['fontSize'] = $this->fontSize;
-        $this->vars['wordWrap'] = $this->wordWrap;
+        $this->vars['wordWrap'] = $this->normalizeWordWrap($this->wordWrap);
         $this->vars['codeFolding'] = $this->codeFolding;
         $this->vars['autoClosing'] = $this->autoClosing;
         $this->vars['tabSize'] = $this->tabSize;
@@ -197,6 +197,38 @@ class CodeEditor extends FormWidgetBase
     }
 
     /**
+     * Normalizes backward-compatible word wrap values to supported Monaco modes.
+     * @param mixed $wordWrap
+     * @return string
+     */
+    protected function normalizeWordWrap($wordWrap)
+    {
+        if ($wordWrap === false || $wordWrap === 0 || $wordWrap === '0' || $wordWrap === 'false' || $wordWrap === 'off' || $wordWrap === null || $wordWrap === '') {
+            return 'off';
+        }
+
+        if ($wordWrap === true || $wordWrap === 1 || $wordWrap === '1' || $wordWrap === 'true' || $wordWrap === 'on' || $wordWrap === 'fluid') {
+            return 'fluid';
+        }
+
+        if (is_numeric($wordWrap)) {
+            $wordWrapColumn = (int) $wordWrap;
+
+            return $wordWrapColumn > 1
+                ? (string) $wordWrapColumn
+                : 'fluid';
+        }
+
+        $wordWrap = strtolower((string) $wordWrap);
+
+        if (in_array($wordWrap, ['off', 'fluid', '40', '80'], true)) {
+            return $wordWrap;
+        }
+
+        return 'fluid';
+    }
+
+    /**
      * @inheritDoc
      */
     protected function loadAssets()
@@ -214,20 +246,39 @@ class CodeEditor extends FormWidgetBase
         // Load the editor system settings
         $preferences = BackendPreference::instance();
 
-        $this->fontSize = $preferences->editor_font_size;
-        $this->wordWrap = $preferences->editor_word_wrap;
-        $this->codeFolding = $preferences->editor_enable_folding ?? ($preferences->editor_code_folding !== 'manual');
-        $this->autoClosing = $preferences->editor_auto_closing;
-        $this->tabSize = $preferences->editor_tab_size;
-        $this->theme = $preferences->editor_theme;
-        $this->showInvisibles = $preferences->editor_show_invisibles;
-        $this->highlightActiveLine = $preferences->editor_highlight_active_line;
-        $this->useSoftTabs = !$preferences->editor_use_hard_tabs;
-        $this->showGutter = $preferences->editor_show_gutter;
-        $this->displayIndentGuides = $preferences->editor_display_indent_guides;
-        $this->showPrintMargin = $preferences->editor_show_print_margin;
-        $this->showMinimap = $preferences->editor_show_minimap;
-        $this->bracketColors = $preferences->editor_bracket_colors;
-        $this->showColors = $preferences->editor_show_colors;
+        $getPreference = static function ($value, $default) {
+            return $value !== null ? $value : $default;
+        };
+
+        $this->fontSize = $getPreference($preferences->editor_font_size, $this->fontSize);
+        $this->wordWrap = $getPreference($preferences->editor_word_wrap, $this->wordWrap);
+        $this->autoClosing = $getPreference($preferences->editor_auto_closing, $this->autoClosing);
+        $this->tabSize = $getPreference($preferences->editor_tab_size, $this->tabSize);
+        $this->theme = $getPreference($preferences->editor_theme, $this->theme);
+        $this->showInvisibles = $getPreference($preferences->editor_show_invisibles, $this->showInvisibles);
+        $this->highlightActiveLine = $getPreference($preferences->editor_highlight_active_line, $this->highlightActiveLine);
+        $this->showGutter = $getPreference($preferences->editor_show_gutter, $this->showGutter);
+        $this->displayIndentGuides = $getPreference($preferences->editor_display_indent_guides, $this->displayIndentGuides);
+        $this->showPrintMargin = $getPreference($preferences->editor_show_print_margin, $this->showPrintMargin);
+        $this->showMinimap = $getPreference($preferences->editor_show_minimap, $this->showMinimap);
+        $this->bracketColors = $getPreference($preferences->editor_bracket_colors, $this->bracketColors);
+        $this->showColors = $getPreference($preferences->editor_show_colors, $this->showColors);
+
+        $editorUseHardTabs = $preferences->editor_use_hard_tabs;
+        if ($editorUseHardTabs !== null) {
+            $this->useSoftTabs = !$editorUseHardTabs;
+        }
+
+        // @deprecated v1.3.0 - keep support for the old editor_code_folding preference
+        $editorEnableFolding = $preferences->editor_enable_folding;
+        if ($editorEnableFolding !== null) {
+            $this->codeFolding = $editorEnableFolding;
+        }
+        else {
+            $editorCodeFolding = $preferences->editor_code_folding;
+            if ($editorCodeFolding !== null) {
+                $this->codeFolding = $editorCodeFolding !== 'manual';
+            }
+        }
     }
 }
