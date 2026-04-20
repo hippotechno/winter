@@ -5,6 +5,7 @@ composer.lock
 
 # Framework ignores
 .env
+.env.local
 .env.*.php
 .env.php
 selenium.php
@@ -37,4 +38,9 @@ node_modules
 # Ignore generated public directory from `winter:mirror public`
 public
 
-.env.local
+# Ignore dev files
+/plugins/*
+!/plugins/.gitkeep
+
+/themes/*
+!/themes/.gitkeep
