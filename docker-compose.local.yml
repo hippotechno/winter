@@ -3,10 +3,12 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+      target: local
       args:
         BUILD_DATE: ${BUILD_DATE:-local}
         VCS_REF: ${VCS_REF:-local}
-        GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      secrets:
+        - github_token
     image: ${LOCAL_IMAGE_NAME:-winter-app:local}
     container_name: ${APP_CONTAINER_NAME:-winter-app-local}
     restart: unless-stopped
@@ -58,6 +60,10 @@ services:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+
+secrets:
+  github_token:
+    environment: GITHUB_TOKEN
 
 volumes:
   winter_storage:

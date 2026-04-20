@@ -2,9 +2,47 @@
 
 Repo này là WinterCMS core fork riêng của bạn.
 Mục tiêu vận hành:
+
 - Bạn tự quản lý và sửa code trong repo này.
 - Chạy local ổn định bằng Docker (PostgreSQL + HTTPS domain local).
 - Build ra Docker image để deploy server bằng `pull` + `up`.
+
+## Quick Start (60 giây)
+
+1. Tạo file env local và chỉnh nhanh các biến chính trong `.env.local`: `APP_URL`, `LOCAL_DOMAIN`, `DB_*`, `APP_KEY`
+
+```bash
+cp .env.local.example .env.local
+```
+
+2. Map domain local vào hosts (thêm subdomain nếu dùng multisite):
+
+```text
+127.0.0.1 tulutala-local.test
+127.0.0.1 demo.tulutala-local.test tombo.tulutala-local.test tltl.tulutala-local.test
+```
+
+3. Nếu build có private package GitHub thì export token trước khi build:
+
+```bash
+export GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx
+```
+
+4. Build và chạy local:
+
+```bash
+docker compose --env-file .env.local -f docker-compose.local.yml up -d --build
+```
+
+5. Chạy setup database lần đầu:
+
+```bash
+docker compose --env-file .env.local -f docker-compose.local.yml exec winter-app php artisan winter:up --no-interaction
+```
+
+6. Truy cập app: `https://tulutala-local.test` (hoặc `:8443` nếu bạn đổi HTTPS port)
+
+Ghi chú: nếu `APP_KEY` đang trống thì làm theo phần `1) Chạy local` -> `Bước 5` bên dưới để ghi key vào `.env.local`.
 
 ## Stack
 
@@ -35,6 +73,7 @@ Repo này có 3 lớp env, mỗi lớp dùng cho mục đích khác nhau:
 3. `.env.runtime`: env cho server/runtime (`docker-compose.runtime.yml`).
 
 Nguyên tắc dùng:
+
 - Local dev: ưu tiên `.env.local`.
 - Deploy server: dùng `.env.runtime`.
 - Không commit file env thật (`.env`, `.env.local`, `.env.runtime`) lên git.
@@ -55,6 +94,7 @@ cp -n .env.example .env
 ### Các biến bắt buộc cho local
 
 Trong `.env.local`, cần kiểm tra tối thiểu:
+
 - `APP_URL`, `LOCAL_DOMAIN`
 - `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
 - `HTTP_BIND_PORT`, `HTTPS_BIND_PORT`, `DB_EXPOSE_PORT`
@@ -62,23 +102,25 @@ Trong `.env.local`, cần kiểm tra tối thiểu:
 
 ### `GITHUB_TOKEN` dùng thế nào
 
-Build local hiện dùng HTTPS + token cho private repo.
+Build local / build image deploy dùng token để tải private package từ GitHub.
 
 Lưu ý quan trọng:
-- `GITHUB_TOKEN` là **build arg**, Docker Compose lấy từ shell env hoặc file `.env` ở root.
-- `env_file: .env.local` của service **không tự động cấp** giá trị cho `build.args`.
 
-Cách chắc nhất khi build:
+- Token được truyền qua BuildKit `secret` (ưu tiên), không ghi cứng vào Dockerfile.
+- `env_file: .env.local` không tự đẩy biến sang build secret; cần `export` biến ở shell trước khi build.
 
-```bash
-GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx \
-docker compose -f docker-compose.local.yml build --no-cache winter-app
-```
-
-Nếu muốn khỏi gõ mỗi lần, export trước:
+Cách dùng:
 
 ```bash
 export GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx
+docker compose --env-file .env.local -f docker-compose.local.yml build --no-cache winter-app
+```
+
+Build image deploy:
+
+```bash
+export GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx
+./docker/build-image.sh --tag registry.example.com/team/winter-app:2026.04.20 --platform linux/amd64
 ```
 
 ## 1) Chạy local (khuyên dùng trước)
@@ -92,22 +134,27 @@ cp .env.local.example .env.local
 ```
 
 Sau khi copy, sửa ngay các biến:
+
 - `APP_URL=https://tulutala-local.test`
 - `LOCAL_DOMAIN=tulutala-local.test`
 - `DB_*` theo database local của bạn
 - `APP_KEY` (nếu trống thì tạo ở Bước 5)
 
-### Bước 2: map domain vào hosts
+### Bước 2: map domain vào hosts (kể cả multisite)
 
-Thêm vào `/etc/hosts`:
+Thêm vào `/etc/hosts` domain gốc và các subdomain bạn dùng:
 
 ```text
 127.0.0.1 tulutala-local.test
+127.0.0.1 demo.tulutala-local.test tombo.tulutala-local.test tltl.tulutala-local.test
 ```
+
+Nếu bạn dùng DNS local kiểu Valet / dnsmasq wildcard thì không cần liệt kê hết từng subdomain trong hosts.
 
 ### Bước 3: kiểm tra port
 
 Local mặc định dùng:
+
 - HTTP: `80`
 - HTTPS: `443`
 - PostgreSQL host port: `5433`
@@ -127,12 +174,16 @@ Khi đó truy cập bằng `https://tulutala-local.test:8443`.
 docker compose --env-file .env.local -f docker-compose.local.yml up -d --build
 ```
 
-### Bước 5: tạo APP_KEY (nếu chưa có)
+### Bước 5: tạo APP_KEY cho `.env.local` (nếu đang trống)
 
-Cách nhanh ngay trong container:
+Không dùng `key:generate --force` ở đây vì lệnh đó ghi vào file `.env` trong container, dễ lệch với `.env.local`.
+
+Dùng lệnh sau để tạo key và ghi thẳng vào `.env.local`:
 
 ```bash
-docker compose --env-file .env.local -f docker-compose.local.yml exec winter-app php artisan key:generate --force
+APP_KEY_VALUE=$(docker compose --env-file .env.local -f docker-compose.local.yml exec -T winter-app php artisan key:generate --show | tr -d '\r')
+awk -v k="$APP_KEY_VALUE" 'BEGIN{done=0} /^APP_KEY=/{print "APP_KEY=" k; done=1; next} {print} END{if(!done) print "APP_KEY=" k}' .env.local > .env.local.tmp && mv .env.local.tmp .env.local
+docker compose --env-file .env.local -f docker-compose.local.yml exec winter-app php artisan config:clear
 ```
 
 ### Bước 6: migrate/setup lần đầu
@@ -200,6 +251,7 @@ Tại repo này:
 ```
 
 Ghi chú:
+
 - Trước khi `--push`, cần login registry, ví dụ GHCR:
 
 ```bash
@@ -244,6 +296,7 @@ docker compose -f docker-compose.runtime.yml --env-file .env.runtime up -d
 Nguyên nhân: trùng port `80`/`443`.
 
 Cách xử lý:
+
 - Tắt service đang chiếm port (Valet/Nginx/Apache), hoặc
 - Đổi `HTTP_BIND_PORT` / `HTTPS_BIND_PORT` trong `.env.local`.
 
@@ -252,6 +305,7 @@ Cách xử lý:
 Nguyên nhân: Docker Desktop không resolve DNS tới Docker Hub.
 
 Cách xử lý:
+
 - Kiểm tra kết nối mạng.
 - Kiểm tra DNS/proxy trong Docker Desktop.
 

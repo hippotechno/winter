@@ -55,14 +55,17 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 VCS_REF="$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
 
-CMD=(docker build -f "$REPO_ROOT/docker/Dockerfile" -t "$IMAGE_TAG" --build-arg "BUILD_DATE=$BUILD_DATE" --build-arg "VCS_REF=$VCS_REF")
+CMD=(docker build -f "$REPO_ROOT/docker/Dockerfile" --target runtime -t "$IMAGE_TAG" --build-arg "BUILD_DATE=$BUILD_DATE" --build-arg "VCS_REF=$VCS_REF")
 if [[ -n "$PLATFORM" ]]; then
     CMD+=(--platform "$PLATFORM")
+fi
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    CMD+=(--secret "id=github_token,env=GITHUB_TOKEN")
 fi
 CMD+=("$REPO_ROOT")
 
 echo "==> Build image: $IMAGE_TAG"
-"${CMD[@]}"
+DOCKER_BUILDKIT=1 "${CMD[@]}"
 
 if [[ "$DO_PUSH" = "true" ]]; then
     echo "==> Push image: $IMAGE_TAG"
