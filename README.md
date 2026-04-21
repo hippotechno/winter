@@ -61,6 +61,7 @@ Ghi chú: nếu `APP_KEY` đang trống thì làm theo phần `1) Chạy local` 
 - `docker/entrypoint.sh`: entrypoint app
 - `docker/Caddyfile`: HTTPS local theo domain
 - `docker/build-image.sh`: script build & push image
+- `release.sh`: script release image lên Harbor theo version
 - `.env.local.example`: biến môi trường local
 - `.env.runtime.example`: biến môi trường runtime
 
@@ -260,6 +261,60 @@ docker login ghcr.io
 
 - Username GHCR là username GitHub của bạn.
 - Nếu chỉ test build local thì bỏ `--push`.
+
+### Release lên Harbor (project `library/tulutala`)
+
+Repo Harbor:
+
+- `harbor.tuimuon.xyz/library/tulutala`
+
+Đăng nhập 1 lần trước khi push:
+
+```bash
+docker login harbor.tuimuon.xyz
+```
+
+Build + push bằng script:
+
+```bash
+./release.sh 1.0.0
+```
+
+Script sẽ:
+
+- Build + push multi-platform mặc định: `linux/amd64,linux/arm64`
+- Push tag version: `harbor.tuimuon.xyz/library/tulutala:1.0.0`
+- Push thêm tag `latest` cùng manifest (trừ khi dùng `--no-latest`)
+- Bắt buộc có git tag tương ứng `v1.0.0` và tag phải trỏ đúng commit hiện tại (HEAD)
+
+Tạo git tag trước khi release:
+
+```bash
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+./release.sh 1.0.0
+```
+
+Ví dụ:
+
+```bash
+# chỉ push version, không push latest
+./release.sh 1.0.1 --no-latest
+
+# build theo platform cụ thể
+./release.sh 1.1.0 --platforms linux/amd64
+
+# build 2 kiến trúc Linux tường minh
+./release.sh 1.1.1 --platforms linux/amd64,linux/arm64
+```
+
+Lưu ý: image hiện tại dùng base Linux (`php:8.3-apache-bookworm`), nên không build/push Windows container từ script này.
+
+Quy tắc tăng version (SemVer):
+
+- Fix bug: tăng số thứ 3 (`1.0.0 -> 1.0.1`)
+- Thêm feature: tăng số thứ 2 (`1.0.1 -> 1.1.0`)
+- Upgrade lớn/breaking: tăng số thứ 1 (`1.1.0 -> 2.0.0`)
 
 ## 5) Chạy runtime trên server từ image
 
