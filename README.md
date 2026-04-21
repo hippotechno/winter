@@ -332,3 +332,29 @@ Sau đó clear cache:
 docker compose --env-file .env.local -f docker-compose.local.yml exec winter-app php artisan config:clear
 docker compose --env-file .env.local -f docker-compose.local.yml exec winter-app php artisan cache:clear
 ```
+
+### Docker local chậm hơn Valet
+
+Nếu cùng data/code mà Docker chậm hơn Valet, thường do:
+
+- Xdebug đang bật cho mọi request.
+- Bind mount code trên Docker Desktop (macOS) chậm I/O hơn chạy native.
+
+Repo này đã đặt local theo hướng nhanh hơn:
+
+- `XDEBUG_MODE=off`
+- `XDEBUG_START_WITH_REQUEST=trigger`
+- Bind mount app dùng `:delegated`
+
+Khi cần debug lại, chỉ cần sửa `.env.local`:
+
+```env
+XDEBUG_MODE=debug,develop
+XDEBUG_START_WITH_REQUEST=trigger
+```
+
+Rồi restart app:
+
+```bash
+docker compose --env-file .env.local -f docker-compose.local.yml restart winter-app
+```

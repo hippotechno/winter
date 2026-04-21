@@ -147,8 +147,8 @@ ENTRYPOINT ["/usr/local/bin/winter-entrypoint"]
 
 FROM runtime AS local
 
-ENV XDEBUG_MODE=debug,develop \
-    XDEBUG_START_WITH_REQUEST=yes \
+ENV XDEBUG_MODE=off \
+    XDEBUG_START_WITH_REQUEST=trigger \
     XDEBUG_CLIENT_HOST=host.docker.internal \
     XDEBUG_CLIENT_PORT=9003 \
     XDEBUG_IDEKEY=VSCODE \

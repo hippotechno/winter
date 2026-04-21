@@ -23,7 +23,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ${APP_CODE_PATH:-.}:/var/www/html
+      - ${APP_CODE_PATH:-.}:/var/www/html:cached
       - winter_cache:/var/www/html/bootstrap/cache
 
   postgres:
