@@ -57,7 +57,7 @@ Ghi chú: nếu `APP_KEY` đang trống thì làm theo phần `1) Chạy local` 
 ## File Docker chính
 
 - `docker-compose.local.yml`: chạy local (app + postgres + redis + caddy)
-- `docker-compose.runtime.yml`: chạy server/runtime từ image đã build (kèm Redis)
+- `docker-compose.runtime.yml`: chạy server/runtime từ image đã build (chỉ app)
 - `docker/Dockerfile`: image app
 - `docker/entrypoint.sh`: entrypoint app
 - `docker/Caddyfile`: HTTPS local theo domain
