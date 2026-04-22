@@ -1,5 +1,11 @@
 <?php
 
+$storageDisk = env('FILESYSTEM_DISK', 'local');
+
+$storageBasePath = $storageDisk === 's3'
+    ? rtrim(env('AWS_URL', ''), '/')
+    : '/storage/app';
+
 return [
 
     /*
@@ -317,20 +323,20 @@ return [
 
     'storage' => [
         'uploads' => [
-            'disk' => 'local',
+            'disk' => $storageDisk,
             'folder' => 'uploads',
-            'path' => '/storage/app/uploads',
+            'path' => $storageBasePath . '/uploads',
             'temporaryUrlTTL' => 3600,
         ],
         'media' => [
-            'disk' => 'local',
+            'disk' => $storageDisk,
             'folder' => 'media',
-            'path' => '/storage/app/media',
+            'path' => $storageBasePath . '/media',
         ],
         'resized' => [
-            'disk' => 'local',
+            'disk' => $storageDisk,
             'folder' => 'resized',
-            'path' => '/storage/app/resized',
+            'path' => $storageBasePath . '/resized',
         ],
     ],
 

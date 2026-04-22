@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.2] - 2026-04-22
 
-- Apply Redis for caching.
+### Added
+
+- Integrated Redis for caching.
+
+### Updated
+
+- Improved S3 configuration handling (only applied when S3 disk is enabled).
 
 ## [1.0.1] - 2026-04-21
 
