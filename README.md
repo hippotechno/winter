@@ -51,12 +51,13 @@ Ghi chú: nếu `APP_KEY` đang trống thì làm theo phần `1) Chạy local` 
 - Twig `1`
 - Docker + Docker Compose
 - PostgreSQL (local)
+- Redis (cache/session/queue)
 - Caddy (reverse proxy HTTPS local)
 
 ## File Docker chính
 
-- `docker-compose.local.yml`: chạy local (app + postgres + caddy)
-- `docker-compose.runtime.yml`: chạy server/runtime từ image đã build
+- `docker-compose.local.yml`: chạy local (app + postgres + redis + caddy)
+- `docker-compose.runtime.yml`: chạy server/runtime từ image đã build (kèm Redis)
 - `docker/Dockerfile`: image app
 - `docker/entrypoint.sh`: entrypoint app
 - `docker/Caddyfile`: HTTPS local theo domain
@@ -98,8 +99,19 @@ Trong `.env.local`, cần kiểm tra tối thiểu:
 
 - `APP_URL`, `LOCAL_DOMAIN`
 - `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+- `REDIS_HOST`, `REDIS_PORT`
 - `HTTP_BIND_PORT`, `HTTPS_BIND_PORT`, `DB_EXPOSE_PORT`
 - `APP_KEY`
+
+Nếu muốn bật Redis cho cache/session/queue, đặt trong `.env.local` hoặc `.env.runtime`:
+
+```env
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+```
 
 ### `GITHUB_TOKEN` dùng thế nào
 
@@ -362,7 +374,7 @@ Nguyên nhân: Docker Desktop không resolve DNS tới Docker Hub.
 Cách xử lý:
 
 - Kiểm tra kết nối mạng.
-- Kiểm tra DNS/proxy trong Docker Desktop.
+- Kiểm tra DNS/network trong Docker Desktop.
 
 ### Lỗi `Internal Server Error`
 

@@ -44,6 +44,8 @@ RUN printf 'Acquire::Retries "5";\nAcquire::ForceIPv4 "true";\n' > /etc/apt/apt.
         pdo_mysql \
         pdo_pgsql \
         zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && a2enmod rewrite headers \
     && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" \
         /etc/apache2/sites-available/*.conf \

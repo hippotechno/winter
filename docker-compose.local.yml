@@ -22,6 +22,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ${APP_CODE_PATH:-.}:/var/www/html:cached
       - winter_cache:/var/www/html/bootstrap/cache
@@ -44,6 +46,22 @@ services:
       start_period: 10s
     volumes:
       - pg_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: ${REDIS_CONTAINER_NAME:-winter-redis-local}
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${REDIS_EXPOSE_PORT:-6379}:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    volumes:
+      - redis_data:/data
 
   caddy:
     image: caddy:2-alpine
@@ -68,5 +86,6 @@ secrets:
 volumes:
   winter_cache:
   pg_data:
+  redis_data:
   caddy_data:
   caddy_config:
