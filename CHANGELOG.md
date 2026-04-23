@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve build scripts to bootstrap/use named Buildx builders and inspect pushed manifests.
 - Optimize Docker build context and runtime artifact pruning (`.dockerignore` + Dockerfile prune step) to reduce image size.
 - Add `INCLUDE_SEED_ASSETS` build strategy with plugin seed convention `plugins/<author>/<plugin>/seed`: keep seed data for local builds, exclude by default in deploy builds (with `--include-seed-assets` override).
+- Ensure Redis PHP driver is present in runtime image and add build-time fail-fast check when `redis` module is missing.
 - Update README with a dedicated **Build Image (Deploy)** section and Vite compile workflow documentation.
 
 ## [1.0.2] - 2026-04-22

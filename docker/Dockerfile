@@ -147,6 +147,8 @@ COPY --from=deps /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=deps /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 COPY --chown=www-data:www-data --from=deps /var/www/html /var/www/html
 
+RUN php -m | grep -qi '^redis$'
+
 RUN if [ "$INCLUDE_SEED_ASSETS" != "true" ]; then \
         find /var/www/html/plugins -mindepth 3 -maxdepth 3 -type d -name seed -prune -exec rm -rf '{}' +; \
     fi
