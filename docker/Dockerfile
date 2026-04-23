@@ -62,6 +62,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 WORKDIR /var/www/html
 
 FROM php-base AS deps
+ARG PRUNE_DEV_ARTIFACTS=true
 
 COPY artisan composer.json composer.lock index.php .htaccess /var/www/html/
 COPY bootstrap /var/www/html/bootstrap
@@ -97,12 +98,21 @@ RUN --mount=type=secret,id=github_token,required=false set -eux; \
         sleep 10; \
     done; \
     [ "$attempt" -le 5 ]; \
+    if [ "$PRUNE_DEV_ARTIFACTS" = "true" ]; then \
+        find /var/www/html/modules /var/www/html/plugins /var/www/html/themes /var/www/html/vendor \
+            -type d \( -name .git -o -name .github -o -name .gitlab -o -name tests -o -name test -o -name __tests__ -o -name docs \) \
+            -prune -exec rm -rf '{}' +; \
+        find /var/www/html/modules /var/www/html/plugins /var/www/html/themes /var/www/html/vendor \
+            -type f \( -name '*.map' -o -name '*.psd' -o -name '*.ai' -o -name '*.sketch' \) \
+            -delete; \
+    fi; \
     rm -f /root/.composer/auth.json; \
     rm -rf /root/.composer/cache
 
 FROM ${PHP_IMAGE} AS runtime
 ARG BUILD_DATE
 ARG VCS_REF
+ARG INCLUDE_SEED_ASSETS=false
 
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
     org.opencontainers.image.revision="${VCS_REF}"
@@ -136,6 +146,10 @@ WORKDIR /var/www/html
 COPY --from=deps /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=deps /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 COPY --chown=www-data:www-data --from=deps /var/www/html /var/www/html
+
+RUN if [ "$INCLUDE_SEED_ASSETS" != "true" ]; then \
+        find /var/www/html/plugins -mindepth 3 -maxdepth 3 -type d -name seed -prune -exec rm -rf '{}' +; \
+    fi
 
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache

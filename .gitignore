@@ -44,3 +44,6 @@ public
 
 /themes/*
 !/themes/.gitkeep
+
+# Theme using Vite
+.vite-packages.production

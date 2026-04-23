@@ -6,12 +6,14 @@ usage() {
 Build + push image multi-platform lên Harbor bằng Docker Buildx.
 
 Usage:
-  ./release.sh <version> [--no-latest] [--platforms linux/amd64,linux/arm64]
+  ./scripts/release.sh <version> [--no-latest] [--platforms linux/amd64,linux/arm64] [--skip-vite-compile] [--include-seed-assets]
 
 Examples:
-  ./release.sh 1.0.0
-  ./release.sh 1.0.1 --no-latest
-  ./release.sh 1.1.0 --platforms linux/amd64
+  ./scripts/release.sh 1.0.0
+  ./scripts/release.sh 1.0.1 --no-latest
+  ./scripts/release.sh 1.1.0 --platforms linux/amd64
+  ./scripts/release.sh 1.1.1 --skip-vite-compile
+  ./scripts/release.sh 1.1.2 --include-seed-assets
 USAGE
 }
 
@@ -23,6 +25,8 @@ fi
 VERSION=""
 PLATFORMS="linux/amd64,linux/arm64"
 PUSH_LATEST="true"
+RUN_VITE_COMPILE="true"
+INCLUDE_SEED_ASSETS="false"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -41,6 +45,14 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       shift 2
+      ;;
+    --skip-vite-compile)
+      RUN_VITE_COMPILE="false"
+      shift
+      ;;
+    --include-seed-assets)
+      INCLUDE_SEED_ASSETS="true"
+      shift
       ;;
     *)
       if [[ -z "$VERSION" ]]; then
@@ -79,7 +91,7 @@ VERSION_TAG="$IMAGE:$VERSION"
 LATEST_TAG="$IMAGE:latest"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$SCRIPT_DIR"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 REQUIRED_GIT_TAG="v$VERSION"
 BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
@@ -129,14 +141,26 @@ if ! docker system info >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! docker buildx inspect >/dev/null 2>&1; then
-  echo "==> Tạo buildx builder mặc định"
-  docker buildx create --name tulutala-builder --use >/dev/null
+BUILDER_NAME="tulutala-builder"
+if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
+  echo "==> Tạo buildx builder: $BUILDER_NAME (docker-container)"
+  docker buildx create --name "$BUILDER_NAME" --driver docker-container --use >/dev/null
 fi
+docker buildx use "$BUILDER_NAME" >/dev/null
+docker buildx inspect --bootstrap "$BUILDER_NAME" >/dev/null
 
 TAGS=(-t "$VERSION_TAG")
 if [[ "$PUSH_LATEST" == "true" ]]; then
   TAGS+=(-t "$LATEST_TAG")
+fi
+
+if [[ "$RUN_VITE_COMPILE" == "true" ]]; then
+  if [[ -x "$REPO_ROOT/scripts/vite-compile-production.sh" ]]; then
+    echo "==> Compile Vite assets (production)"
+    "$REPO_ROOT/scripts/vite-compile-production.sh" --config "$REPO_ROOT/.vite-packages.production"
+  else
+    echo "==> Không tìm thấy scripts/vite-compile-production.sh, bỏ qua compile Vite."
+  fi
 fi
 
 echo "==> Build + Push image:"
@@ -155,6 +179,7 @@ BUILD_CMD=(
   --push
   --build-arg "BUILD_DATE=$BUILD_DATE"
   --build-arg "VCS_REF=$VCS_REF"
+  --build-arg "INCLUDE_SEED_ASSETS=$INCLUDE_SEED_ASSETS"
 )
 if [[ -n "${GITHUB_TOKEN:-}" ]]; then
   BUILD_CMD+=(--secret "id=github_token,env=GITHUB_TOKEN")
@@ -164,6 +189,9 @@ BUILD_CMD+=("$REPO_ROOT")
 
 DOCKER_BUILDKIT=1 "${BUILD_CMD[@]}"
 
+echo "==> Inspect manifest: $VERSION_TAG"
+docker buildx imagetools inspect "$VERSION_TAG" || true
+
 echo
 echo "Release hoàn tất"
 echo "- Version: $VERSION_TAG"
@@ -171,5 +199,6 @@ if [[ "$PUSH_LATEST" == "true" ]]; then
   echo "- Latest : $LATEST_TAG"
 fi
 echo "- Platforms: $PLATFORMS"
+echo "- Include seed assets: $INCLUDE_SEED_ASSETS"
 echo
 echo "Nếu chưa login Harbor, chạy: docker login harbor.tuimuon.xyz"

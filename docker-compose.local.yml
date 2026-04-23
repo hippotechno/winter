@@ -7,6 +7,7 @@ services:
       args:
         BUILD_DATE: ${BUILD_DATE:-local}
         VCS_REF: ${VCS_REF:-local}
+        INCLUDE_SEED_ASSETS: ${INCLUDE_SEED_ASSETS:-true}
       secrets:
         - github_token
     image: ${LOCAL_IMAGE_NAME:-winter-app:local}

@@ -1,0 +1,5 @@
+# Danh sách Vite package cần compile production.
+# 1 package / dòng, dùng tên đúng theo `php artisan vite:list --json`
+#
+# Ví dụ:
+theme-wn-tombo-theme

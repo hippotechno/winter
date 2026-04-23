@@ -62,7 +62,7 @@ Ghi chú: nếu `APP_KEY` đang trống thì làm theo phần `1) Chạy local` 
 - `docker/entrypoint.sh`: entrypoint app
 - `docker/Caddyfile`: HTTPS local theo domain
 - `docker/build-image.sh`: script build & push image
-- `release.sh`: script release image lên Harbor theo version
+- `scripts/release.sh`: script release image lên Harbor theo version
 - `.env.local.example`: biến môi trường local
 - `.env.runtime.example`: biến môi trường runtime
 
@@ -252,81 +252,98 @@ docker compose --env-file .env.local -f docker-compose.local.yml down
 docker compose --env-file .env.local -f docker-compose.local.yml down -v
 ```
 
-## 4) Build image để deploy server
+## 4) Build Image (Deploy)
 
-Tại repo này:
+Section này chỉ dành cho việc build image deploy.
+
+### 4.1) Chuẩn bị danh sách theme compile production
+
+Tạo file danh sách package Vite cần build:
+
+```bash
+cp .vite-packages.production.example .vite-packages.production
+```
+
+Mỗi dòng là 1 package (ví dụ: `theme-wn-tombo-theme`), format chuẩn theo:
+
+```bash
+php artisan vite:list --json
+```
+
+Khi chạy build script, hệ thống sẽ:
+
+- Liệt kê danh sách package cần compile
+- Cho bạn chọn `all` hoặc nhập index kiểu `1,2,5,6`
+- Nếu không nhập gì trong 60 giây thì tự động chọn tất cả theo list
+
+### 4.2) Build image bằng script chung
 
 ```bash
 ./docker/build-image.sh \
   --tag ghcr.io/your-org/winter-app:2026.04.18 \
-  --platform linux/amd64 \
+  --platforms linux/amd64 \
   --push
 ```
 
-Ghi chú:
+Tùy chọn:
 
-- Trước khi `--push`, cần login registry, ví dụ GHCR:
+- Bỏ compile Vite trước build: `--skip-vite-compile`
+- Multi-platform: `--platforms linux/amd64,linux/arm64`
+- Giữ seed assets trong image: `--include-seed-assets`
 
-```bash
-docker login ghcr.io
-```
+Quy ước seed theo plugin:
 
-- Username GHCR là username GitHub của bạn.
-- Nếu chỉ test build local thì bỏ `--push`.
+- Mỗi plugin đặt seed data vào folder cố định: `plugins/<author>/<plugin>/seed`
+- Ví dụ: `plugins/hippo/core/seed`, `plugins/hippo/servit/seed`
 
-### Release lên Harbor (project `library/tulutala`)
+Mặc định script build/release sẽ loại toàn bộ folder `seed` theo pattern trên khỏi runtime image.
+Lý do: server runtime không cần seed data nếu dữ liệu đã migrate trước đó.
+Local build (`docker-compose.local.yml`) vẫn giữ seed assets.
+
+### 4.3) Release lên Harbor (project `library/tulutala`)
 
 Repo Harbor:
 
 - `harbor.tuimuon.xyz/library/tulutala`
 
-Đăng nhập 1 lần trước khi push:
+Đăng nhập:
 
 ```bash
 docker login harbor.tuimuon.xyz
 ```
 
-Build + push bằng script:
-
-```bash
-./release.sh 1.0.0
-```
-
-Script sẽ:
-
-- Build + push multi-platform mặc định: `linux/amd64,linux/arm64`
-- Push tag version: `harbor.tuimuon.xyz/library/tulutala:1.0.0`
-- Push thêm tag `latest` cùng manifest (trừ khi dùng `--no-latest`)
-- Bắt buộc có git tag tương ứng `v1.0.0` và tag phải trỏ đúng commit hiện tại (HEAD)
-
-Tạo git tag trước khi release:
+Tạo tag release:
 
 ```bash
 git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
-./release.sh 1.0.0
 ```
+
+Build + push release:
+
+```bash
+./scripts/release.sh 1.0.0
+```
+
+Tùy chọn:
+
+- Không push `latest`: `--no-latest`
+- Chỉ build 1 platform: `--platforms linux/amd64`
+- Bỏ compile Vite: `--skip-vite-compile`
+- Giữ seed assets trong image: `--include-seed-assets`
 
 Ví dụ:
 
 ```bash
-# chỉ push version, không push latest
-./release.sh 1.0.1 --no-latest
-
-# build theo platform cụ thể
-./release.sh 1.1.0 --platforms linux/amd64
-
-# build 2 kiến trúc Linux tường minh
-./release.sh 1.1.1 --platforms linux/amd64,linux/arm64
+./scripts/release.sh 1.0.1 --no-latest
+./scripts/release.sh 1.1.0 --platforms linux/amd64
+./scripts/release.sh 1.1.1 --platforms linux/amd64,linux/arm64
 ```
 
-Lưu ý: image hiện tại dùng base Linux (`php:8.3-apache-bookworm`), nên không build/push Windows container từ script này.
+Lưu ý:
 
-Quy tắc tăng version (SemVer):
-
-- Fix bug: tăng số thứ 3 (`1.0.0 -> 1.0.1`)
-- Thêm feature: tăng số thứ 2 (`1.0.1 -> 1.1.0`)
-- Upgrade lớn/breaking: tăng số thứ 1 (`1.1.0 -> 2.0.0`)
+- Image dùng base Linux (`php:8.3-apache-bookworm`), không build Windows container.
+- Trước khi push GHCR: `docker login ghcr.io`.
 
 ## 5) Chạy runtime trên server từ image
 
