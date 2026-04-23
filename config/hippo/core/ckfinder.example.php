@@ -87,15 +87,62 @@ $config['backends']['laravel_logs'] = array(
 
 // Backends
 
-$config['backends']['default'] = array(
-    'name'         => 'default',
-    'adapter'      => 'local',
-    'baseUrl'      => config('app.url').'/storage/fm/',
-    'root'         => storage_path('fm/'),
-    'chmodFiles'   => 0777,
-    'chmodFolders' => 0777,
-    'filesystemEncoding' => 'UTF-8'
-);
+$fmPrefix = trim((string) env('HIPPO_CORE_FM_PREFIX', 'fm'), '/');
+$fmPrefix = $fmPrefix !== '' ? $fmPrefix : 'fm';
+
+$defaultFilesystemDisk = (string) config('filesystems.default', 'local');
+$defaultDiskConfig = (array) config('filesystems.disks.' . $defaultFilesystemDisk, []);
+$defaultDiskDriver = strtolower((string) ($defaultDiskConfig['driver'] ?? 'local'));
+
+if ($defaultDiskDriver === 's3') {
+    $bucket = (string) ($defaultDiskConfig['bucket'] ?? '');
+    $region = (string) ($defaultDiskConfig['region'] ?? 'us-east-1');
+    $endpoint = (string) ($defaultDiskConfig['endpoint'] ?? '');
+    $usePathStyleEndpoint = (bool) ($defaultDiskConfig['use_path_style_endpoint'] ?? false);
+
+    $baseUrl = (string) ($defaultDiskConfig['url'] ?? '');
+    if ($baseUrl === '' && $endpoint !== '' && $bucket !== '') {
+        $baseUrl = rtrim($endpoint, '/');
+        if ($usePathStyleEndpoint) {
+            $baseUrl .= '/' . $bucket;
+        } else {
+            $baseUrl = preg_replace('#^(https?://)#', '$1' . $bucket . '.', $baseUrl);
+        }
+    }
+
+    if ($baseUrl === '' && $bucket !== '') {
+        $baseUrl = "https://{$bucket}.s3.{$region}.amazonaws.com";
+    }
+
+    if ($baseUrl === '') {
+        $baseUrl = rtrim((string) config('app.url'), '/') . '/storage';
+    }
+
+    $config['backends']['default'] = array_filter(array(
+        'name'         => 'default',
+        'adapter'      => 's3',
+        'baseUrl'      => rtrim($baseUrl, '/') . '/' . $fmPrefix . '/',
+        'root'         => $fmPrefix . '/',
+        'bucket'       => $defaultDiskConfig['bucket'] ?? null,
+        'region'       => $defaultDiskConfig['region'] ?? null,
+        'key'          => $defaultDiskConfig['key'] ?? null,
+        'secret'       => $defaultDiskConfig['secret'] ?? null,
+        'token'        => $defaultDiskConfig['token'] ?? null,
+        'endpoint'     => $defaultDiskConfig['endpoint'] ?? null,
+        'options'      => $defaultDiskConfig['options'] ?? null,
+        'filesystemEncoding' => 'UTF-8',
+    ), static fn($value) => $value !== null);
+} else {
+    $config['backends']['default'] = array(
+        'name'         => 'default',
+        'adapter'      => 'local',
+        'baseUrl'      => rtrim((string) config('app.url'), '/') . '/storage/' . $fmPrefix . '/',
+        'root'         => storage_path($fmPrefix . '/'),
+        'chmodFiles'   => 0777,
+        'chmodFolders' => 0777,
+        'filesystemEncoding' => 'UTF-8'
+    );
+}
 
 /*================================ Resource Types =====================================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_resourceTypes
