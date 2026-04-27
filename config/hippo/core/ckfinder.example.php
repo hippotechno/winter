@@ -24,14 +24,14 @@ $config = array();
 
 $config['loadRoutes'] = false;
 
-$config['authentication'] = function() {
+$config['authentication'] = function () {
     return true;
 };
 
 /*============================ License Key ============================================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_licenseKey
 
-$config['licenseName'] = 'tumlumtala.test';
+$config['licenseName'] = env('APP_DOMAIN');
 $config['licenseKey']  = 'HE7ERCMC8NNHP92RWG5KP5JX24TJC';
 
 /*============================ CKFinder Internal Directory ============================*/
@@ -87,8 +87,7 @@ $config['backends']['laravel_logs'] = array(
 
 // Backends
 
-$fmPrefix = trim((string) env('HIPPO_CORE_FM_PREFIX', 'fm'), '/');
-$fmPrefix = $fmPrefix !== '' ? $fmPrefix : 'fm';
+$fmPrefix = 'fm';
 
 $defaultFilesystemDisk = (string) config('filesystems.default', 'local');
 $defaultDiskConfig = (array) config('filesystems.disks.' . $defaultFilesystemDisk, []);
@@ -133,11 +132,14 @@ if ($defaultDiskDriver === 's3') {
         'filesystemEncoding' => 'UTF-8',
     ), static fn($value) => $value !== null);
 } else {
+    $localRoot = rtrim((string) config('filesystems.disks.local.root', storage_path('app')), "/\\");
+    $localUrl = rtrim((string) config('filesystems.disks.local.url', '/storage/app'), '/');
+
     $config['backends']['default'] = array(
         'name'         => 'default',
         'adapter'      => 'local',
-        'baseUrl'      => rtrim((string) config('app.url'), '/') . '/storage/' . $fmPrefix . '/',
-        'root'         => storage_path($fmPrefix . '/'),
+        'baseUrl'      => rtrim((string) config('app.url'), '/') . $localUrl . '/' . $fmPrefix . '/',
+        'root'         => $localRoot . '/' . $fmPrefix . '/',
         'chmodFiles'   => 0777,
         'chmodFolders' => 0777,
         'filesystemEncoding' => 'UTF-8'

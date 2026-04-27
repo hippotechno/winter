@@ -438,7 +438,7 @@
             "type": "package",
             "package": {
                 "name": "hippo/wn-decorgreen-theme",
-                "version": "dev-dev",
+                "version": "dev-main",
                 "type": "winter-theme",
                 "source": {
                     "type": "git",
@@ -451,7 +451,7 @@
             "type": "package",
             "package": {
                 "name": "hippo/wn-gaion-theme",
-                "version": "dev-main",
+                "version": "dev-dev",
                 "type": "winter-theme",
                 "source": {
                     "type": "git",
