@@ -9,9 +9,7 @@ Usage:
   ./docker/build-image.sh \
     --tag ghcr.io/org/winter-app:2026.04.18 \
     [--platforms linux/amd64,linux/arm64] \
-    [--skip-vite-compile] \
     [--include-seed-assets] \
-    [--allow-missing-github-token] \
     [--push]
 USAGE
 }
@@ -107,9 +105,7 @@ print_manifest_sizes() {
 IMAGE_TAG=""
 PLATFORMS="linux/amd64"
 DO_PUSH="false"
-RUN_VITE_COMPILE="true"
 INCLUDE_SEED_ASSETS="false"
-REQUIRE_GITHUB_TOKEN="true"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -125,16 +121,8 @@ while [[ $# -gt 0 ]]; do
             DO_PUSH="true"
             shift
             ;;
-        --skip-vite-compile)
-            RUN_VITE_COMPILE="false"
-            shift
-            ;;
         --include-seed-assets)
             INCLUDE_SEED_ASSETS="true"
-            shift
-            ;;
-        --allow-missing-github-token)
-            REQUIRE_GITHUB_TOKEN="false"
             shift
             ;;
         -h|--help)
@@ -177,22 +165,7 @@ log_info "==> Build image: $IMAGE_TAG"
 log_info "==> Platforms : $PLATFORMS"
 log_info "==> Include seed assets: $INCLUDE_SEED_ASSETS"
 
-if [[ "$REQUIRE_GITHUB_TOKEN" == "true" && -z "${GITHUB_TOKEN:-}" ]]; then
-    log_error "Thiếu GITHUB_TOKEN trong shell hiện tại."
-    log_error "Hãy export token trước khi build để tránh fail ở bước composer:"
-    log_error "  export GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx"
-    log_error "Nếu build này không cần private package, chạy thêm --allow-missing-github-token."
-    exit 1
-fi
-
-if [[ "$RUN_VITE_COMPILE" = "true" ]]; then
-    if [[ -x "$REPO_ROOT/scripts/vite-compile-production.sh" ]]; then
-        log_info "==> Compile Vite assets (production)"
-        "$REPO_ROOT/scripts/vite-compile-production.sh" --config "$REPO_ROOT/.vite-packages.production"
-    else
-        log_warn "==> Không tìm thấy scripts/vite-compile-production.sh, bỏ qua compile Vite."
-    fi
-fi
+"$REPO_ROOT/scripts/preflight-build.sh" --interactive-assets --asset-timeout 60
 
 CMD=(
     docker buildx build

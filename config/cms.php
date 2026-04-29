@@ -38,11 +38,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | Specifies the URL name used for accessing back-end pages.
-    | For example: backend -> http://localhost/backend
+    | For example: backend -> http://localhost/app
     |
     */
 
-    'backendUri' => 'app',
+    'backendUri' => env('BACKEND_URI', 'app'),
 
     /*
     |--------------------------------------------------------------------------

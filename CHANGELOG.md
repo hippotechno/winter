@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4]
+
+### Added
+
+- Add `scripts/clone_hippo_repos.sh` to bootstrap Hippo plugin and theme source repositories for local image builds.
+- Add `config/hippo-repos.yaml` as the plugin/theme repository manifest used by clone and preflight scripts, with optional `required: false` entries.
+- Add `scripts/preflight-build.sh` to validate build prerequisites and clone missing plugin/theme source before image builds.
+- Add `php artisan hippo:setup` to run plugin/theme `setup.yaml` build commands with `--list`, `--check`, `--only`, `--fresh`, `--force`, and `--no-prompt` support.
+- Add `setup.yaml` support for plugin/theme build setup checks, including Hippo.Core vendor publish setup and Tombo theme production asset setup.
+- Add `plugins/hippo/core/docs/setup_console.md` documenting the setup console workflow and `setup.yaml` conventions.
+- Add `composer.lock` to lock framework and vendor dependencies for reproducible image builds.
+
+### Changed
+
+- Remove Hippo plugin/theme package repositories from root `composer.json`; plugin and theme source is now copied from local `plugins/` and `themes/`.
+- Build image config files from `config/hippo/core/*.example.php` instead of copying local-only config files.
+- Make `GITHUB_TOKEN` optional for build and release scripts.
+- Remove the `.vite-packages.production` workflow from build and release scripts.
+- Update preflight to check `setup.yaml` paths, prompt to run `php artisan hippo:setup --phase=build` when setup checks are missing, and continue build when the user chooses to pass warnings.
+- Update Tombo theme setup to compile production assets through Winter Vite instead of running npm install inside the theme workspace.
+- Refactor README Quick Start for fresh framework pulls, including plugin/theme clone, root dependency install, and setup command flow; move detailed sections under advanced headings.
+- Simplify local environment handling to root `.env`, move runtime environment template to `docker/.env.runtime.example`, and update Docker Compose usage accordingly.
+
 ## [1.0.3]
 
 ### Added

@@ -1,0 +1,106 @@
+plugins:
+    - folder: bg360
+      repo: git@github.com:hippotechno/wn-boardgame-plugin.git
+      branch: dev
+    - folder: blog
+      repo: git@github.com:hippotechno/wn-blog-plugin.git
+      branch: dev
+    - folder: cantin
+      repo: git@github.com:hippotechno/wn-cantin-plugin.git
+      branch: dev
+    - folder: core
+      repo: git@github.com:hippotechno/wn-core-plugin.git
+      branch: dev
+    - folder: driverpostal
+      repo: git@github.com:Hippo-Technology-JSC/wn-driverpostal-plugin.git
+      branch: main
+    - folder: eatery
+      repo: git@github.com:hippotechno/wn-eatery-plugin.git
+      branch: dev
+    - folder: forum
+      repo: git@github.com:hippotechno/wn-forum-plugin.git
+      branch: dev
+    - folder: gaion
+      repo: git@github.com:hippotechno/wn-gaion-plugin.git
+      branch: dev
+    - folder: game
+      repo: git@github.com:hippotechno/wn-game-plugin.git
+      branch: dev
+    - folder: gamify
+      repo: git@github.com:hippotechno/wn-gamify-plugin.git
+      branch: dev
+    - folder: icones
+      repo: git@github.com:hippotechno/wn-icones-plugin.git
+      branch: dev
+    - folder: misc
+      repo: git@github.com:hippotechno/wn-misc-plugin.git
+      branch: dev
+    - folder: notify
+      repo: git@github.com:hippotechno/wn-notify-plugin.git
+      branch: dev
+    - folder: pass
+      repo: git@github.com:hippotechno/wn-pass-plugin.git
+      branch: dev
+    - folder: proojet
+      repo: git@github.com:hippotechno/wn-proojet-plugin.git
+      branch: dev
+    - folder: river
+      repo: git@github.com:hippotechno/wn-river-plugin.git
+      branch: dev
+    - folder: servit
+      repo: git@github.com:hippotechno/wn-servit-plugin.git
+      branch: dev
+    - folder: shoop
+      repo: git@github.com:hippotechno/wn-shoop-plugin.git
+      branch: dev
+    - folder: smallrecords
+      repo: git@github.com:hippotechno/wn-records-plugin.git
+      branch: dev
+    - folder: sociallogin
+      repo: git@github.com:hippotechno/wn-sociallogin-plugin.git
+      branch: dev
+    - folder: swamp
+      repo: git@github.com:hippotechno/wn-swamp-plugin.git
+      branch: dev
+    - folder: triip
+      repo: git@github.com:hippotechno/wn-triip-plugin.git
+      branch: dev
+    - folder: utils
+      repo: git@github.com:hippotechno/wn-utils-plugin.git
+      branch: dev
+    - folder: wallet
+      repo: git@github.com:hippotechno/wn-wallet-plugin.git
+      branch: dev
+    - folder: website
+      repo: git@github.com:hippotechno/wn-website-plugin.git
+      branch: dev
+
+themes:
+    - folder: wn-bg360-theme
+      repo: git@github.com:hippotechno/wn-bg360-theme.git
+      branch: dev
+    - folder: wn-decorgreen-theme
+      repo: git@github.com:hippotechno/wn-decorgreen-theme.git
+      branch: dev
+    - folder: wn-gaion-theme
+      repo: git@github.com:hippotechno/wn-gaion-theme.git
+      branch: main
+    - folder: wn-researchvn-theme
+      repo: git@github.com:hippotechno/wn-researchvn-theme.git
+      branch: main
+      required: false
+    - folder: wn-thomo-theme
+      repo: git@github.com:hippotechno/wn-thomo-theme.git
+      branch: main
+    - folder: wn-thungiay-theme
+      repo: git@github.com:hippotechno/wn-thungiay-theme.git
+      branch: main
+    - folder: wn-tombo-theme
+      repo: git@github.com:hippotechno/wn-tombo-theme.git
+      branch: main
+    - folder: sas-sas-21
+      repo: git@github.com:hippotechno/wn-sas-theme.git
+      branch: main
+    - folder: oc-theme-bumen-17
+      repo: git@github.com:silver-arrow-software/oc-theme-bumen-17.git
+      branch: main

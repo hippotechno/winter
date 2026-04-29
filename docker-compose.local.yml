@@ -14,7 +14,7 @@ services:
     container_name: ${APP_CONTAINER_NAME:-winter-app-local}
     restart: unless-stopped
     env_file:
-      - .env.local
+      - .env
     environment:
       LOG_CHANNEL: stderr
       CHOWN_STORAGE: "false"
@@ -69,7 +69,7 @@ services:
     container_name: ${WEB_CONTAINER_NAME:-winter-web-local}
     restart: unless-stopped
     env_file:
-      - .env.local
+      - .env
     depends_on:
       - winter-app
     ports:

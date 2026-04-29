@@ -67,6 +67,8 @@ ARG PRUNE_DEV_ARTIFACTS=true
 COPY artisan composer.json composer.lock index.php .htaccess /var/www/html/
 COPY bootstrap /var/www/html/bootstrap
 COPY config /var/www/html/config
+RUN cp /var/www/html/config/hippo/core/config.example.php /var/www/html/config/hippo/core/config.php \
+    && cp /var/www/html/config/hippo/core/ckfinder.example.php /var/www/html/config/hippo/core/ckfinder.php
 COPY modules /var/www/html/modules
 COPY plugins /var/www/html/plugins
 COPY themes /var/www/html/themes

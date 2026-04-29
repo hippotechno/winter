@@ -4,69 +4,99 @@ return [
     'enable_multisite' => true,
     'sites' => [
         [
-            'host' => '6am.tumlumtala.test',
-            'theme' => 'six-am-beginner',
+            'host' => 'www.tuimuon.xyz',
+            'theme' => 'hippo-theme-default',
             'skin' => 'uikit'
         ],
         [
-            'host' => 'demo.tumlumtala.test',
-            'theme' => 'demo',
+            'host' => 'silverarrowsoftware.com',
+            'theme' => 'sas-sas-21'
+        ],
+        [
+            'host' => 'muitenbac.com',
+            'theme' => 'sas-sas-21'
+        ],
+        [
+            'host' => 'tulutala.com',
+            'theme' => 'hippo-theme-default',
             'skin' => 'uikit'
         ],
         [
-            'host' => 'bg360.tumlumtala.test',
+            'host' => 'decorgreensaigon.com',
+            'theme' => 'wn-decorgreen-theme'
+        ],
+        [
+            'host' => 'trammb.com',
+            'theme' => 'hippo-theme-default'
+        ],
+        [
+            'host' => 'boardgame360.com',
             'theme' => 'wn-bg360-theme',
             'skin' => 'uikit'
         ],
+        // [
+        //      'host' => 'bumen.vn',
+        //      'theme' => 'sas-bumen-17'
+        // ],
         [
-            'host' => 'decorgreen.tumlumtala.test',
-            'theme' => 'wn-decorgreen-theme',
-            'skin' => 'uikit'
+            'host' => 'phanbokho.com',
+            'theme' => 'hippo-datsinh-18'
         ],
         [
-            'host' => 'rise.tumlumtala.test',
-            'theme' => 'wn-rise-theme',
-            'skin' => 'uikit'
+            'host' => 'thunghero.com',
+            'theme' => 'wn-thungiay-theme'
         ],
         [
-            'host' => 'linhaisushi.tumlumtala.test',
-            'theme' => 'wn-linhaisushi-theme',
-            'skin' => 'uikit'
+            'host' => 'thungjet.com',
+            'theme' => 'wn-thungiay-theme'
         ],
         [
-            'host' => 'thungiay.tumlumtala.test',
-            'theme' => 'wn-thungiay-theme',
-            'skin' => 'uikit'
+            'host' => 'demo.tulutala.com',
+            'theme' => 'oc-theme-bumen-17'
         ],
         [
-            'host' => 'catwine.tumlumtala.test',
-            'theme' => 'wn-catwine-theme',
-            'skin' => 'uikit'
+            'host' => 'catwine.tulutala.com',
+            'theme' => 'wn-catwine-theme'
         ],
         [
-            'host' => 'thomo.tumlumtala.test',
-            'theme' => 'wn-thomo-theme',
-            'skin' => 'uikit'
+            'host' => 'rise.tulutala.com',
+            'theme' => 'wn-rise-theme'
         ],
         [
-            'host' => 'gaion.tumlumtala.test',
-            'theme' => 'wn-gaion-theme',
-            'skin' => 'uikit'
+            'host' => 'boardgame360.com',
+            'theme' => 'wn-bg360-theme'
         ],
         [
-            'host' => 'tombo.tumlumtala.test',
-            'theme' => 'wn-tombo-theme',
-            'skin' => 'uikit'
+            'host' => 'gaion.dev',
+            'theme' => 'wn-gaion-theme'
         ],
         [
-            'host' => 'tomboooo.tumlumtala.test',
-            'theme' => 'wn-tombo-theme',
-            'skin' => 'uikit'
+            'host' => 'vn.sbitdev.kr',
+            'theme' => 'wn-gaion-theme'
         ],
         [
-            'host' => 'tltl.tumlumtala.test',
-            'theme' => 'wn-tltl-theme',
-            'skin' => 'uikit'
+            'host' => 'bumen.tulutala.com',
+            'theme' => 'oc-theme-bumen-17'
+        ],
+        [
+            'host' => 'tombocaffe.com',
+            'theme' => 'wn-tombo-theme'
+        ],
+        [
+            'host' => 'tomboramen.com',
+            'theme' => 'wn-tombo-theme'
+        ],
+        [
+            'host' => 'cuakhaumyquytay.com',
+            'theme' => 'wn-thomo-theme'
+        ],
+        [
+            'host' => 'cuakhauthomo.com',
+            'theme' => 'wn-thomo-theme'
+        ],
+        [
+            'host' => 'myquy.com',
+            'theme' => 'wn-thomo-theme'
         ],
     ]
 ];

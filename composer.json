@@ -1,14 +1,16 @@
 {
-    "name": "wintercms/winter",
-    "description": "Free, open-source, self-hosted CMS platform based on the Laravel PHP Framework. Originally known as October CMS.",
-    "homepage": "https://wintercms.com",
+    "name": "hippo/winter",
+    "description": "Rebuild, self-hosted CMS platform based on the Laravel PHP Framework. Originally known as Winter CMS AKA October CMS.",
+    "homepage": "https://tulutala.com",
     "type": "project",
     "keywords": [
         "winter",
         "cms",
         "wintercms",
         "laravel",
-        "cmf"
+        "cmf",
+        "hippo",
+        "hippotechno"
     ],
     "license": "MIT",
     "authors": [
@@ -29,10 +31,7 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/wintercms/winter/issues",
-        "docs": "https://wintercms.github.io/docs/",
-        "discord": "https://discord.gg/D5MFSPH6Ux",
-        "source": "https://github.com/wintercms/winter"
+        "source": "https://github.com/hippotechno/winter"
     },
     "require": {
         "laravel/framework": "^9.52",
@@ -40,7 +39,6 @@
         "php-http/guzzle7-adapter": "^1.1",
         "tpetry/laravel-postgresql-enhanced": "*",
         "wikimedia/composer-merge-plugin": "~2.1.0",
-
         "winter/storm": "1.2.12",
         "winter/wn-backend-module": "1.2.12",
         "winter/wn-cms-module": "1.2.12",
@@ -48,44 +46,10 @@
         "winter/wn-translate-plugin": "2.3.2",
         "winter/wn-location-plugin": "2.2.0",
         "winter/wn-blocks-plugin": "dev-main",
-
         "barryvdh/laravel-dompdf": "^3.1",
         "composer/installers": "^1.11 || ^2.0",
         "google/protobuf": "^4.33",
-        "grpc/grpc": "^1.74",
-        
-        "hippo/bg360-plugin": "dev-dev",
-        "hippo/blog-plugin": "dev-dev",
-        "hippo/cantin-plugin": "dev-dev",
-        "hippo/core-plugin": "dev-dev",
-        "hippo/driverpostal-plugin": "dev-main",
-        "hippo/eatery-plugin": "dev-dev",
-        "hippo/forum-plugin": "dev-dev",
-        "hippo/gaion-plugin": "dev-dev",
-        "hippo/game-plugin": "dev-dev",
-        "hippo/gamify-plugin": "dev-dev",
-        "hippo/icones-plugin": "dev-dev",
-        "hippo/misc-plugin": "dev-dev",
-        "hippo/notify-plugin": "dev-dev",
-        "hippo/pass-plugin": "dev-dev",
-        "hippo/proojet-plugin": "dev-dev",
-        "hippo/river-plugin": "dev-dev",
-        "hippo/servit-plugin": "dev-dev",
-        "hippo/shoop-plugin": "dev-dev",
-        "hippo/smallrecords-plugin": "dev-dev",
-        "hippo/sociallogin-plugin": "dev-dev",
-        "hippo/swamp-plugin": "dev-dev",
-        "hippo/triip-plugin": "dev-dev",
-        "hippo/utils-plugin": "dev-dev",
-        "hippo/wallet-plugin": "dev-dev",
-        "hippo/website-plugin": "dev-dev",
-        "hippo/wn-bg360-theme": "dev-dev",
-        "hippo/wn-decorgreen-theme": "dev-dev",
-        "hippo/wn-gaion-theme": "dev-main",
-        "hippo/wn-researchvn-theme": "dev-main",
-        "hippo/wn-thomo-theme": "dev-main",
-        "hippo/wn-thungiay-theme": "dev-main",
-        "hippo/wn-tombo-theme": "dev-main"
+        "grpc/grpc": "^1.74"
     },
     "require-dev": {
         "dms/phpunit-arraysubset-asserts": "^0.1.0|^0.2.1",
@@ -95,431 +59,11 @@
         "phpunit/phpunit": "^9.5.8",
         "squizlabs/php_codesniffer": "^3.2"
     },
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/bg360-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-boardgame-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/blog-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-blog-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/cantin-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-cantin-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/core-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-core-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/driverpostal-plugin",
-                "version": "dev-main",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:Hippo-Technology-JSC/wn-driverpostal-plugin.git",
-                    "reference": "main"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/eatery-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-eatery-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/forum-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-forum-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/gaion-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-gaion-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/game-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-game-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/gamify-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-gamify-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/icones-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-icones-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/misc-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-misc-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/notify-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-notify-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/pass-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-pass-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/proojet-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-proojet-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/river-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-river-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/servit-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-servit-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/shoop-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-shoop-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/smallrecords-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-records-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/sociallogin-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-sociallogin-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/swamp-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-swamp-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/triip-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-triip-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/utils-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-utils-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wallet-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-wallet-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/website-plugin",
-                "version": "dev-dev",
-                "type": "winter-plugin",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-website-plugin.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wn-bg360-theme",
-                "version": "dev-dev",
-                "type": "winter-theme",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-bg360-theme.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wn-decorgreen-theme",
-                "version": "dev-main",
-                "type": "winter-theme",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-decorgreen-theme.git",
-                    "reference": "dev"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wn-gaion-theme",
-                "version": "dev-dev",
-                "type": "winter-theme",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-gaion-theme.git",
-                    "reference": "main"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wn-researchvn-theme",
-                "version": "dev-main",
-                "type": "winter-theme",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-researchvn-theme.git",
-                    "reference": "main"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wn-thomo-theme",
-                "version": "dev-main",
-                "type": "winter-theme",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-thomo-theme.git",
-                    "reference": "main"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wn-thungiay-theme",
-                "version": "dev-main",
-                "type": "winter-theme",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-thungiay-theme.git",
-                    "reference": "main"
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "hippo/wn-tombo-theme",
-                "version": "dev-main",
-                "type": "winter-theme",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:hippotechno/wn-tombo-theme.git",
-                    "reference": "main"
-                }
-            }
-        }
-    ],
     "scripts": {
         "post-create-project-cmd": [
             "php artisan key:generate"
         ],
-        "post-install-cmd": [
-
-        ],
+        "post-install-cmd": [],
         "post-update-cmd": [
             "php artisan winter:version",
             "php artisan package:discover"
@@ -540,29 +84,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
-        "installer-paths": {
-            "themes/wn-bg360-theme/": [
-                "hippo/wn-bg360-theme"
-            ],
-            "themes/wn-decorgreen-theme/": [
-                "hippo/wn-decorgreen-theme"
-            ],
-            "themes/wn-gaion-theme/": [
-                "hippo/wn-gaion-theme"
-            ],
-            "themes/wn-researchvn-theme/": [
-                "hippo/wn-researchvn-theme"
-            ],
-            "themes/wn-thomo-theme/": [
-                "hippo/wn-thomo-theme"
-            ],
-            "themes/wn-thungiay-theme/": [
-                "hippo/wn-thungiay-theme"
-            ],
-            "themes/wn-tombo-theme/": [
-                "hippo/wn-tombo-theme"
-            ]
-        },
         "merge-plugin": {
             "include": [
                 "plugins/hippo/*/composer.json"
@@ -575,8 +96,14 @@
     },
     "config": {
         "preferred-install": {
-            "hippo/*": "source",
             "*": "dist"
+        },
+        "audit": {
+            "abandoned": "report",
+            "ignore": {
+                "GHSA-78fx-h6xr-vch4": "Blocked by the WinterCMS 1.2 / Laravel 9 stack. The patched Laravel versions start at 10.48.29; handle in the planned framework upgrade.",
+                "GHSA-2x45-7fc3-mxwq": "Blocked by laravel/passport 10.x and google/auth 1.x constraints on firebase/php-jwt ^6. Handle when upgrading the OAuth/auth dependency stack to php-jwt 7."
+            }
         },
         "allow-plugins": {
             "composer/installers": true,

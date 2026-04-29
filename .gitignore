@@ -1,11 +1,11 @@
 # Composer ignores Local Hippo core config
 vendor
 composer.phar
-composer.lock
 
 # Framework ignores
 .env
 .env.local
+docker/.env.runtime
 .env.*.php
 .env.php
 selenium.php

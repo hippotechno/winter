@@ -6,13 +6,12 @@ usage() {
 Build + push image multi-platform lên Harbor bằng Docker Buildx.
 
 Usage:
-  ./scripts/release.sh <version> [--no-latest] [--platforms linux/amd64,linux/arm64] [--skip-vite-compile] [--include-seed-assets] [--allow-missing-github-token]
+  ./scripts/release.sh <version> [--no-latest] [--platforms linux/amd64,linux/arm64] [--include-seed-assets]
 
 Examples:
   ./scripts/release.sh 1.0.0
   ./scripts/release.sh 1.0.1 --no-latest
   ./scripts/release.sh 1.1.0 --platforms linux/amd64
-  ./scripts/release.sh 1.1.1 --skip-vite-compile
   ./scripts/release.sh 1.1.2 --include-seed-assets
 USAGE
 }
@@ -113,9 +112,7 @@ fi
 VERSION=""
 PLATFORMS="linux/amd64,linux/arm64"
 PUSH_LATEST="true"
-RUN_VITE_COMPILE="true"
 INCLUDE_SEED_ASSETS="false"
-REQUIRE_GITHUB_TOKEN="true"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -135,16 +132,8 @@ while [[ $# -gt 0 ]]; do
       fi
       shift 2
       ;;
-    --skip-vite-compile)
-      RUN_VITE_COMPILE="false"
-      shift
-      ;;
     --include-seed-assets)
       INCLUDE_SEED_ASSETS="true"
-      shift
-      ;;
-    --allow-missing-github-token)
-      REQUIRE_GITHUB_TOKEN="false"
       shift
       ;;
     *)
@@ -241,14 +230,6 @@ if echo "$AUTH_CHECK_OUTPUT" | grep -Eqi 'unauthorized|authentication required|n
   exit 1
 fi
 
-if [[ "$REQUIRE_GITHUB_TOKEN" == "true" && -z "${GITHUB_TOKEN:-}" ]]; then
-  log_error "Thiếu GITHUB_TOKEN trong shell hiện tại."
-  log_error "Hãy export token trước khi release để tránh fail ở bước composer:"
-  log_error "  export GITHUB_TOKEN=ghp_xxx_or_github_pat_xxx"
-  log_error "Nếu release này không cần private package, chạy thêm --allow-missing-github-token."
-  exit 1
-fi
-
 BUILDER_NAME="tulutala-builder"
 if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
   log_info "==> Tạo buildx builder: $BUILDER_NAME (docker-container)"
@@ -262,15 +243,6 @@ if [[ "$PUSH_LATEST" == "true" ]]; then
   TAGS+=(-t "$LATEST_TAG")
 fi
 
-if [[ "$RUN_VITE_COMPILE" == "true" ]]; then
-  if [[ -x "$REPO_ROOT/scripts/vite-compile-production.sh" ]]; then
-    log_info "==> Compile Vite assets (production)"
-    "$REPO_ROOT/scripts/vite-compile-production.sh" --config "$REPO_ROOT/.vite-packages.production"
-  else
-    log_warn "==> Không tìm thấy scripts/vite-compile-production.sh, bỏ qua compile Vite."
-  fi
-fi
-
 log_info "==> Build + Push image:"
 if [[ "$PUSH_LATEST" == "true" ]]; then
   echo "    - Tags     : ${VERSION_TAG}, ${LATEST_TAG}"
@@ -278,6 +250,8 @@ else
   echo "    - Tags     : ${VERSION_TAG}"
 fi
 echo "    - Platforms: ${PLATFORMS}"
+
+"$REPO_ROOT/scripts/preflight-build.sh" --interactive-assets --asset-timeout 60
 
 BUILD_CMD=(
   docker buildx build

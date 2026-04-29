@@ -4,7 +4,7 @@ services:
     container_name: ${APP_CONTAINER_NAME:-winter-app}
     restart: unless-stopped
     env_file:
-      - .env.runtime
+      - ${RUNTIME_ENV_FILE:-docker/.env.runtime}
     environment:
       APP_ENV: ${APP_ENV:-production}
       APP_DEBUG: ${APP_DEBUG:-false}

@@ -21,4 +21,6 @@ storage
 bootstrap/cache
 .env
 .env.*
+config/hippo/core/config.php
+config/hippo/core/ckfinder.php
 docker-compose*.yml
