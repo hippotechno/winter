@@ -128,6 +128,7 @@ if ($defaultDiskDriver === 's3') {
         'secret'       => $defaultDiskConfig['secret'] ?? null,
         'token'        => $defaultDiskConfig['token'] ?? null,
         'endpoint'     => $defaultDiskConfig['endpoint'] ?? null,
+        'use_path_style_endpoint' => $defaultDiskConfig['use_path_style_endpoint'] ?? null,
         'options'      => $defaultDiskConfig['options'] ?? null,
         'filesystemEncoding' => 'UTF-8',
     ), static fn($value) => $value !== null);
