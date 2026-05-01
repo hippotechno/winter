@@ -20,6 +20,8 @@ services:
       CHOWN_STORAGE: "false"
     expose:
       - "80"
+    extra_hosts:
+      - "storage.tuimuon.xyz:171.235.163.107"
     depends_on:
       postgres:
         condition: service_healthy

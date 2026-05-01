@@ -503,6 +503,30 @@ Cách xử lý:
 - Tắt service đang chiếm port (Valet/Nginx/Apache), hoặc
 - Đổi `HTTP_BIND_PORT` / `HTTPS_BIND_PORT` trong `.env`.
 
+### Recreate toàn bộ local container
+
+Khi đổi Dockerfile, compose, env, hoặc container chạy sai trạng thái, recreate toàn bộ local stack:
+
+```bash
+docker compose -f docker-compose.local.yml up -d --build --force-recreate
+```
+
+Nếu muốn dừng container cũ trước rồi tạo lại:
+
+```bash
+docker compose -f docker-compose.local.yml down
+docker compose -f docker-compose.local.yml up -d --build --force-recreate
+```
+
+Nếu muốn xóa luôn volume local, gồm database/cache, dùng `down -v`.
+
+Lưu ý: lệnh này sẽ mất database local.
+
+```bash
+docker compose -f docker-compose.local.yml down -v
+docker compose -f docker-compose.local.yml up -d --build --force-recreate
+```
+
 ### Lỗi `no such host registry-1.docker.io`
 
 Nguyên nhân: Docker Desktop không resolve DNS tới Docker Hub.
@@ -511,6 +535,35 @@ Cách xử lý:
 
 - Kiểm tra kết nối mạng.
 - Kiểm tra DNS/network trong Docker Desktop.
+
+### Build fail ở `pecl install redis`
+
+Nếu thấy lỗi tương tự:
+
+```text
+ERROR: unable to unpack /tmp/pear/download/redis-*.tgz
+```
+
+Nguyên nhân thường là PECL tải gói bị lỗi giữa chừng. Dockerfile đã có retry cho bước này, nhưng nếu vẫn fail thì prune cache rồi build lại:
+
+```bash
+docker buildx prune -f
+docker compose -f docker-compose.local.yml build --no-cache winter-app
+docker compose -f docker-compose.local.yml up -d --force-recreate
+```
+
+Lưu ý: nếu build fail nhưng container vẫn `Created` hoặc `Started`, Docker có thể đang dùng image cũ. Cần nhìn dòng build cuối cùng để xác nhận image mới có build thành công hay không.
+
+### Artisan trong container báo `git: not found`
+
+Một số command dev, ví dụ `winter:util git pull`, cần `git` bên trong container.
+
+Local image đã cài `git` và `openssh-client`. Nếu vẫn gặp lỗi, rebuild lại local image:
+
+```bash
+docker compose -f docker-compose.local.yml build --no-cache winter-app
+docker compose -f docker-compose.local.yml up -d --force-recreate
+```
 
 ### Lỗi `Internal Server Error`
 

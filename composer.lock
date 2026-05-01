@@ -203,16 +203,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.379.8",
+            "version": "3.379.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "856ddf3d241c29132fe1eb946e112351ab043542"
+                "reference": "aaa9aab5d077018dbc9af63338b2c5aa44a5add3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/856ddf3d241c29132fe1eb946e112351ab043542",
-                "reference": "856ddf3d241c29132fe1eb946e112351ab043542",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/aaa9aab5d077018dbc9af63338b2c5aa44a5add3",
+                "reference": "aaa9aab5d077018dbc9af63338b2c5aa44a5add3",
                 "shasum": ""
             },
             "require": {
@@ -294,9 +294,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.379.8"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.379.9"
             },
-            "time": "2026-04-27T19:13:21+00:00"
+            "time": "2026-04-29T18:07:13+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -3702,16 +3702,16 @@
         },
         {
             "name": "iconify/json",
-            "version": "2.2.467",
+            "version": "2.2.468",
             "source": {
                 "type": "git",
                 "url": "https://github.com/iconify/icon-sets.git",
-                "reference": "838c8c614ec8e8158e7e8bfd823d48c183540880"
+                "reference": "65ab95d3f1682147677959e473756373757c1046"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/iconify/icon-sets/zipball/838c8c614ec8e8158e7e8bfd823d48c183540880",
-                "reference": "838c8c614ec8e8158e7e8bfd823d48c183540880",
+                "url": "https://api.github.com/repos/iconify/icon-sets/zipball/65ab95d3f1682147677959e473756373757c1046",
+                "reference": "65ab95d3f1682147677959e473756373757c1046",
                 "shasum": ""
             },
             "type": "library",
@@ -3728,9 +3728,9 @@
             "homepage": "https://iconify.design/icon-sets/",
             "support": {
                 "issues": "https://github.com/iconify/icon-sets/issues",
-                "source": "https://github.com/iconify/icon-sets/tree/2.2.467"
+                "source": "https://github.com/iconify/icon-sets/tree/2.2.468"
             },
-            "time": "2026-04-27T04:18:12+00:00"
+            "time": "2026-04-30T05:26:37+00:00"
         },
         {
             "name": "iconify/json-tools",

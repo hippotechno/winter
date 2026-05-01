@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5]
+
+### Added
+
+- Add `docker/.env.runtime.example` as the runtime image environment template.
+- Add `ckfinder:download` to `plugins/hippo/core/setup.yaml` before publishing CKFinder assets.
+- Add Docker troubleshooting notes for recreating local containers and PECL Redis download failures.
+- Add local Docker host mapping for `storage.tuimuon.xyz` so PHP cURL and the S3 client can resolve the storage endpoint consistently.
+
+### Changed
+
+- Replace local Docker environment usage from `.env.local` to root `.env`.
+- Replace local domain variable usage from `LOCAL_DOMAIN` to `APP_DOMAIN`.
+- Update `docker-compose.runtime.yml` to read runtime env from `docker/.env.runtime`.
+- Update the local S3 endpoint to use the public `storage.tuimuon.xyz` URL instead of the cluster-only MinIO service hostname.
+- Route Docu markdown storage through the configured filesystem disk instead of local `File` operations.
+- Update CKFinder S3 backend bootstrapping to pass custom S3 endpoint and path-style options to the AWS client.
+- Improve preflight theme asset prompt wording with concrete input examples.
+- Add retry handling for `pecl install redis` in Dockerfile to recover from partial PECL downloads.
+- Update README env, runtime, and local workflow documentation for the simplified `.env` setup.
+
+### Fixed
+
+- Fix Docu markdown files being written to a project-root `fm` folder when `FILESYSTEM_DISK=s3`.
+- Fix Docu create/update handlers reporting success when S3 writes fail.
+- Fix Docu index cleanup and file listing to work with S3 prefixes safely.
+- Fix CKFinder using the default AWS S3 hostname instead of the configured custom S3 endpoint.
+
 ## [1.0.4]
 
 ### Added

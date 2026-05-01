@@ -44,7 +44,15 @@ RUN printf 'Acquire::Retries "5";\nAcquire::ForceIPv4 "true";\n' > /etc/apt/apt.
         pdo_mysql \
         pdo_pgsql \
         zip \
-    && pecl install redis \
+    && attempt=1; \
+        until [ "$attempt" -gt 5 ]; do \
+            rm -rf /tmp/pear/download/redis-* /tmp/pear/temp/redis-*; \
+            pecl install redis && break; \
+            echo "PECL redis install failed, retry $attempt/5"; \
+            attempt=$((attempt + 1)); \
+            sleep 10; \
+        done; \
+        [ "$attempt" -le 5 ] \
     && docker-php-ext-enable redis \
     && a2enmod rewrite headers \
     && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" \
@@ -176,10 +184,12 @@ ENV XDEBUG_MODE=off \
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends $PHPIZE_DEPS; \
+    apt-get install -y --no-install-recommends $PHPIZE_DEPS git openssh-client; \
     pecl install xdebug; \
     docker-php-ext-enable xdebug; \
     apt-get purge -y --auto-remove $PHPIZE_DEPS; \
+    git config --global url."https://github.com/".insteadOf "git@github.com:"; \
+    git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 

@@ -182,8 +182,11 @@ confirm_missing_assets() {
     fi
 
     printf "\n"
-    printf "Nhấn Enter để tiếp tục tất cả, nhập số để xác nhận từng theme, hoặc nhập q để dừng.\n"
-    printf "Tự tiếp tục tất cả sau %ss: " "$ASSET_TIMEOUT"
+    printf "Bạn muốn tiếp tục build với theme nào?\n"
+    printf "- Enter: tiếp tục với tất cả theme đang cảnh báo.\n"
+    printf "- Nhập số: chỉ xác nhận theme được chọn, ví dụ 1 hoặc 1,3.\n"
+    printf "- q: dừng build.\n"
+    printf "Nếu không nhập gì, tự tiếp tục với tất cả sau %ss: " "$ASSET_TIMEOUT"
 
     if ! read -r -t "$ASSET_TIMEOUT" input; then
         printf "\nHết thời gian chờ; tiếp tục tất cả theme thiếu assets.\n"
