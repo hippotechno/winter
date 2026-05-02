@@ -14,8 +14,9 @@ errors=()
 warnings=()
 asset_ok=()
 asset_missing=()
-setup_ok=()
-setup_missing=()
+setup_check_output=""
+setup_check_failed=false
+setup_check_count=0
 INTERACTIVE_ASSETS=false
 ASSET_TIMEOUT=60
 SETUP_TIMEOUT=60
@@ -74,55 +75,44 @@ require_file() {
 }
 
 scan_setup_checks() {
-    setup_ok=()
-    setup_missing=()
+    setup_check_failed=false
+    setup_check_count=0
+    setup_check_output="$(
+        cd "$ROOT_DIR" \
+            && CACHE_DRIVER=file SESSION_DRIVER=file QUEUE_CONNECTION=sync \
+                php artisan hippo:setup --phase=build --scope=local --check --no-prompt 2>&1
+    )" || setup_check_failed=true
 
-    while IFS= read -r setup_file; do
-        setup_name="${setup_file#$ROOT_DIR/}"
-        has_checks=false
-
-        while IFS=$'\t' read -r command_id check_path; do
-            [[ -z "${command_id:-}" || -z "${check_path:-}" ]] && continue
-            has_checks=true
-
-            if [[ -e "$ROOT_DIR/$check_path" ]]; then
-                setup_ok+=("$setup_name:$command_id -> $check_path")
-            else
-                setup_missing+=("$setup_name:$command_id -> $check_path")
-            fi
-        done < <(read_setup_checks "$setup_file")
-
-        if [[ "$has_checks" != "true" ]]; then
-            warnings+=("Setup file has no checks to verify: $setup_name")
-        fi
-    done < <({
-        find "$ROOT_DIR/plugins" -mindepth 3 -maxdepth 3 -name setup.yaml -print 2>/dev/null
-        find "$ROOT_DIR/themes" -mindepth 2 -maxdepth 2 -name setup.yaml -print 2>/dev/null
-    } | sort)
+    if [[ "$setup_check_failed" != "true" && -n "$setup_check_output" ]]; then
+        setup_check_count="$(grep -c '^OK ' <<< "$setup_check_output" || true)"
+    fi
 }
 
 confirm_setup_checks() {
     local input
 
-    if (( ${#setup_missing[@]} == 0 )); then
+    if [[ "$setup_check_failed" != "true" ]]; then
         return 0
     fi
 
-    printf "${YELLOW}Setup checks chưa đạt:${NC}\n"
-    printf ' - %s\n' "${setup_missing[@]}"
+    printf "\n${YELLOW}Local setup chưa đạt:${NC}\n"
+    printf "Các mục dưới đây thuộc plugins/themes local. Nếu bỏ qua, Docker vẫn copy source hiện tại vào image.\n\n"
+    printf '%s\n' "$setup_check_output"
 
     if [[ "$INTERACTIVE_ASSETS" != "true" || ! -t 0 ]]; then
         printf "\n"
-        printf "${GREEN}INFO: Tiếp tục build với setup checks chưa đạt.${NC}\n"
+        printf "${GREEN}INFO: Tiếp tục build dù local setup chưa đạt.${NC}\n"
         return 0
     fi
 
     printf "\n"
-    printf "Bạn có muốn chạy php artisan hippo:setup --phase=build không? [Y/n]\n"
-    printf "Tự tiếp tục build sau %ss nếu không nhập gì: " "$SETUP_TIMEOUT"
+    printf "Chạy local setup trước khi build không?\n"
+    printf '%s\n' "- Enter hoặc y: chạy php artisan hippo:setup --phase=build --scope=local"
+    printf '%s\n' "- n: bỏ qua và build với source hiện tại"
+    printf "Nếu không nhập gì, tự bỏ qua sau %ss: " "$SETUP_TIMEOUT"
 
     if ! read -r -t "$SETUP_TIMEOUT" input; then
-        printf "\n${GREEN}INFO: Tiếp tục build với setup checks chưa đạt.${NC}\n"
+        printf "\n${GREEN}INFO: Tiếp tục build dù local setup chưa đạt.${NC}\n"
         return 0
     fi
 
@@ -130,25 +120,25 @@ confirm_setup_checks() {
 
     if [[ -z "$input" || "$input" == "y" || "$input" == "Y" || "$input" == "yes" || "$input" == "YES" ]]; then
         printf "${GREEN}INFO: Chạy setup build phase.${NC}\n"
-        (cd "$ROOT_DIR" && php artisan hippo:setup --phase=build)
+        (cd "$ROOT_DIR" && CACHE_DRIVER=file SESSION_DRIVER=file QUEUE_CONNECTION=sync php artisan hippo:setup --phase=build --scope=local)
 
         scan_setup_checks
 
-        if (( ${#setup_missing[@]} > 0 )); then
-            printf "${YELLOW}Setup checks vẫn chưa đạt sau khi chạy setup:${NC}\n"
-            printf ' - %s\n' "${setup_missing[@]}"
-            printf "${GREEN}INFO: Tiếp tục build với setup checks chưa đạt.${NC}\n"
+        if [[ "$setup_check_failed" == "true" ]]; then
+            printf "${YELLOW}Local setup vẫn chưa đạt sau khi chạy:${NC}\n"
+            printf '%s\n' "$setup_check_output"
+            printf "${GREEN}INFO: Tiếp tục build dù local setup chưa đạt.${NC}\n"
         fi
 
         return 0
     fi
 
     if [[ "$input" == "n" || "$input" == "N" || "$input" == "no" || "$input" == "NO" ]]; then
-        printf "${GREEN}INFO: Tiếp tục build với setup checks chưa đạt.${NC}\n"
+        printf "${GREEN}INFO: Tiếp tục build dù local setup chưa đạt.${NC}\n"
         return 0
     fi
 
-    printf "${YELLOW}Không hiểu lựa chọn '%s'. Tiếp tục build với setup checks chưa đạt.${NC}\n" "$input"
+    printf "${YELLOW}Không hiểu lựa chọn '%s'. Tiếp tục build dù local setup chưa đạt.${NC}\n" "$input"
 }
 
 require_dockerignore() {
@@ -170,32 +160,32 @@ confirm_missing_assets() {
         return 0
     fi
 
-    printf "${YELLOW}Theme thiếu production assets:${NC}\n"
+    printf "\n${YELLOW}Theme thiếu production assets:${NC}\n"
     for i in "${!asset_missing[@]}"; do
         printf ' %d. %s\n' "$((i + 1))" "${asset_missing[$i]}"
     done
 
     if [[ "$INTERACTIVE_ASSETS" != "true" || ! -t 0 ]]; then
         printf "\n"
-        printf "${GREEN}Tiếp tục build với các cảnh báo trên.${NC}\n"
+        printf "${GREEN}INFO: Tiếp tục build dù theme trên chưa có production assets.${NC}\n"
         return 0
     fi
 
     printf "\n"
-    printf "Bạn muốn tiếp tục build với theme nào?\n"
-    printf "- Enter: tiếp tục với tất cả theme đang cảnh báo.\n"
-    printf "- Nhập số: chỉ xác nhận theme được chọn, ví dụ 1 hoặc 1,3.\n"
-    printf "- q: dừng build.\n"
-    printf "Nếu không nhập gì, tự tiếp tục với tất cả sau %ss: " "$ASSET_TIMEOUT"
+    printf "Xác nhận theme được phép thiếu production assets:\n"
+    printf '%s\n' "- Enter: xác nhận tất cả theme trong danh sách."
+    printf '%s\n' "- Nhập số: chỉ xác nhận theme được chọn, ví dụ 1 hoặc 1,3."
+    printf '%s\n' "- q: dừng build."
+    printf "Nếu không nhập gì, tự xác nhận tất cả sau %ss: " "$ASSET_TIMEOUT"
 
     if ! read -r -t "$ASSET_TIMEOUT" input; then
-        printf "\nHết thời gian chờ; tiếp tục tất cả theme thiếu assets.\n"
+        printf "\nINFO: Hết thời gian chờ, xác nhận tất cả theme thiếu assets.\n"
         return 0
     fi
 
     input="${input//[[:space:]]/}"
     if [[ -z "$input" ]]; then
-        printf "Tiếp tục tất cả theme thiếu assets.\n"
+        printf "INFO: Xác nhận tất cả theme thiếu assets.\n"
         return 0
     fi
 
@@ -225,11 +215,24 @@ confirm_missing_assets() {
         exit 1
     fi
 
-    printf "Đã xác nhận tiếp tục với theme thiếu assets: "
+    printf "INFO: Đã xác nhận theme thiếu assets: "
     for theme in "${asset_missing[@]}"; do
         printf "%s " "$theme"
     done
     printf "\n"
+}
+
+print_preflight_summary() {
+    printf "${GREEN}Preflight summary:${NC}\n"
+    printf ' - Theme assets: %d OK, %d warning\n' "${#asset_ok[@]}" "${#asset_missing[@]}"
+
+    if [[ "$setup_check_failed" == "true" ]]; then
+        printf ' - Local setup: warning, có check chưa đạt\n'
+    else
+        printf ' - Local setup: OK (%s checks)\n' "$setup_check_count"
+    fi
+
+    printf ' - Image setup: Docker build sẽ tự chạy/check scope=image sau composer install\n'
 }
 
 read_manifest() {
@@ -270,45 +273,6 @@ read_manifest() {
             echo implode("\t", $entry), PHP_EOL;
         }
     ' "$MANIFEST_FILE"
-}
-
-read_setup_checks() {
-    local setup_file="$1"
-
-    php -r '
-        $file = $argv[1];
-        $lines = file($file, FILE_IGNORE_NEW_LINES);
-        $command = null;
-        $inChecks = false;
-
-        foreach ($lines as $line) {
-            $trim = trim($line);
-            if ($trim === "" || str_starts_with($trim, "#")) {
-                continue;
-            }
-
-            if (preg_match("/^- id:\\s*(.+)$/", $trim, $m)) {
-                $command = trim($m[1], "\"'\''");
-                $inChecks = false;
-                continue;
-            }
-
-            if ($trim === "checks:" && $command) {
-                $inChecks = true;
-                continue;
-            }
-
-            if ($inChecks && preg_match("/^-\\s*path:\\s*(.+)$/", $trim, $m)) {
-                $path = trim($m[1], "\"'\''");
-                echo $command, "\t", $path, PHP_EOL;
-                continue;
-            }
-
-            if ($inChecks && !preg_match("/^\\s*-/", $line) && !preg_match("/^\\s+path:/", $line)) {
-                $inChecks = false;
-            }
-        }
-    ' "$setup_file"
 }
 
 require_file composer.json
@@ -391,34 +355,27 @@ while IFS= read -r package_file; do
         asset_ok+=("$theme_name: OK (dist)")
     else
         asset_missing+=("$theme_name")
-        warnings+=("Theme '$theme_name' có package.json nhưng chưa thấy assets production (assets/dist hoặc dist). Docker sẽ copy nguyên theme hiện tại vào image, không tự build Vite.")
+        warnings+=("Theme '$theme_name' có package.json nhưng chưa thấy assets production (assets/dist hoặc dist).")
     fi
 done < <(find "$ROOT_DIR/themes" -mindepth 2 -maxdepth 2 -name package.json -print 2>/dev/null | sort)
 
 scan_setup_checks
 
-if (( ${#asset_ok[@]} > 0 )); then
-    printf "${GREEN}Theme production assets:${NC}\n"
-    printf ' - %s\n' "${asset_ok[@]}"
-fi
-
-if (( ${#setup_ok[@]} > 0 )); then
-    printf "${GREEN}Setup checks:${NC}\n"
-    printf ' - %s\n' "${setup_ok[@]}"
-fi
+print_preflight_summary
 
 if (( ${#errors[@]} > 0 )); then
+    printf "\n"
     printf "${RED}Preflight failed:${NC}\n" >&2
     printf ' - %s\n' "${errors[@]}" >&2
     exit 1
 fi
 
 if (( ${#warnings[@]} > 0 )); then
-    printf "${YELLOW}Preflight warnings:${NC}\n"
+    printf "\n${YELLOW}Warnings:${NC}\n"
     printf ' - %s\n' "${warnings[@]}"
 fi
 
 confirm_setup_checks
 confirm_missing_assets
 
-printf "${GREEN}Preflight build: OK${NC}\n"
+printf "\n${GREEN}Preflight build: OK${NC}\n"

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `docker/.env.runtime.example` as the runtime image environment template.
 - Add `ckfinder:download` to `plugins/hippo/core/setup.yaml` before publishing CKFinder assets.
 - Add Docker troubleshooting notes for recreating local containers and PECL Redis download failures.
+- Add image-scoped setup support for commands that must run after Docker `composer install`.
 - Add local Docker host mapping for `storage.tuimuon.xyz` so PHP cURL and the S3 client can resolve the storage endpoint consistently.
 
 ### Changed
@@ -23,7 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Route Docu markdown storage through the configured filesystem disk instead of local `File` operations.
 - Update CKFinder S3 backend bootstrapping to pass custom S3 endpoint and path-style options to the AWS client.
 - Improve preflight theme asset prompt wording with concrete input examples.
+- Simplify preflight output so local setup, image-scoped setup, and theme asset warnings are easier to distinguish.
+- Add a 60-second confirmation prompt before building and pushing release images to Harbor.
 - Add retry handling for `pecl install redis` in Dockerfile to recover from partial PECL downloads.
+- Run image-scoped setup commands during Docker build so vendor-generated files like CKFinder connector code exist in runtime images.
+- Refactor preflight setup validation to call `hippo:setup --scope=local` instead of parsing `setup.yaml` separately.
 - Update README env, runtime, and local workflow documentation for the simplified `.env` setup.
 
 ### Fixed
@@ -32,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix Docu create/update handlers reporting success when S3 writes fail.
 - Fix Docu index cleanup and file listing to work with S3 prefixes safely.
 - Fix CKFinder using the default AWS S3 hostname instead of the configured custom S3 endpoint.
+- Fix Docker image setup failing when artisan runs before `storage/framework` exists.
+- Fix CKFinder connector file being present but not autoloadable after image-scoped setup by regenerating Composer autoload during Docker build.
+- Fix CKFinder connector bootstrap by loading the downloaded connector file directly when Composer autoload does not know it yet.
 
 ## [1.0.4]
 

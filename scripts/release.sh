@@ -35,6 +35,49 @@ log_warn() { printf "%s%s%s\n" "$C_YELLOW" "$*" "$C_RESET"; }
 log_error() { printf "%s%s%s\n" "$C_RED" "$*" "$C_RESET" >&2; }
 log_success() { printf "%s%s%s\n" "$C_GREEN" "$*" "$C_RESET"; }
 
+confirm_push() {
+  local input
+
+  echo
+  log_warn "Chuẩn bị build image và push lên Harbor:"
+  if [[ "$PUSH_LATEST" == "true" ]]; then
+    echo "    - Tags     : ${VERSION_TAG}, ${LATEST_TAG}"
+  else
+    echo "    - Tags     : ${VERSION_TAG}"
+  fi
+  echo "    - Platforms: ${PLATFORMS}"
+  echo "    - Include seed assets: ${INCLUDE_SEED_ASSETS}"
+
+  if [[ ! -t 0 ]]; then
+    log_info "INFO: Không chờ nhập lựa chọn, tiếp tục build và push image."
+    return 0
+  fi
+
+  echo
+  printf "Nhấn Enter để tiếp tục build và push, nhập n hoặc q để dừng.\n"
+  printf "Nếu không nhập gì, tự tiếp tục build và push sau 60s: "
+
+  if ! read -r -t 60 input; then
+    printf "\n"
+    log_info "INFO: Hết thời gian chờ, tiếp tục build và push image."
+    return 0
+  fi
+
+  input="${input//[[:space:]]/}"
+
+  if [[ -z "$input" || "$input" == "y" || "$input" == "Y" || "$input" == "yes" || "$input" == "YES" ]]; then
+    log_info "INFO: Tiếp tục build và push image."
+    return 0
+  fi
+
+  if [[ "$input" == "n" || "$input" == "N" || "$input" == "no" || "$input" == "NO" || "$input" == "q" || "$input" == "Q" ]]; then
+    log_error "Dừng release theo lựa chọn của bạn."
+    exit 1
+  fi
+
+  log_warn "Không hiểu lựa chọn '$input'. Tiếp tục build và push image."
+}
+
 format_bytes() {
   local bytes="$1"
   awk -v b="$bytes" 'function human(x){s="B KB MB GB TB"; n=split(s,u," "); i=1; while (x>=1024 && i<n){x/=1024;i++} return sprintf("%.2f %s", x, u[i])} BEGIN{print human(b)}'
@@ -243,7 +286,7 @@ if [[ "$PUSH_LATEST" == "true" ]]; then
   TAGS+=(-t "$LATEST_TAG")
 fi
 
-log_info "==> Build + Push image:"
+log_info "==> Release target:"
 if [[ "$PUSH_LATEST" == "true" ]]; then
   echo "    - Tags     : ${VERSION_TAG}, ${LATEST_TAG}"
 else
@@ -252,6 +295,8 @@ fi
 echo "    - Platforms: ${PLATFORMS}"
 
 "$REPO_ROOT/scripts/preflight-build.sh" --interactive-assets --asset-timeout 60
+
+confirm_push
 
 BUILD_CMD=(
   docker buildx build

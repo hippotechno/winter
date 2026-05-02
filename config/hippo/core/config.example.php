@@ -5,7 +5,7 @@ return [
     'sites' => [
         [
             'host' => 'www.tuimuon.xyz',
-            'theme' => 'hippo-theme-default',
+            'theme' => 'hippo-default-theme',
             'skin' => 'uikit'
         ],
         [
@@ -18,7 +18,7 @@ return [
         ],
         [
             'host' => 'tulutala.com',
-            'theme' => 'hippo-theme-default',
+            'theme' => 'hippo-default-theme',
             'skin' => 'uikit'
         ],
         [
@@ -27,7 +27,7 @@ return [
         ],
         [
             'host' => 'trammb.com',
-            'theme' => 'hippo-theme-default'
+            'theme' => 'hippo-default-theme'
         ],
         [
             'host' => 'boardgame360.com',

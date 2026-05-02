@@ -347,7 +347,8 @@ Build contract:
 - Repo trong `config/hippo-repos.yaml` mặc định là bắt buộc. Nếu đặt `required: false`, clone script vẫn biết repo đó, nhưng preflight không fail khi repo đó thiếu hoặc chưa đủ source. Dùng cho repo đang thử nghiệm, docs-only, hoặc chưa cần vào runtime image.
 - `config/hippo/core/config.php` và `config/hippo/core/ckfinder.php` là file local-only; image tạo chúng từ `*.example.php`.
 - Theme dùng Vite nên có production assets sẵn trong `assets/dist` hoặc `dist` trước khi build image. Nếu thiếu, `scripts/preflight-build.sh` sẽ warning; khi chạy qua build/release script, prompt sẽ hiện danh sách theme thiếu assets, cho phép nhấn Enter để tiếp tục tất cả, nhập số để xác nhận từng theme, hoặc tự tiếp tục sau 60 giây.
-- Plugin/theme có `setup.yaml` nên khai báo `checks` cho từng command. Preflight sẽ kiểm tra các path này để biết setup đã tạo đủ file/folder cần thiết hay chưa. Nếu thiếu checks, preflight sẽ hỏi có muốn chạy `php artisan hippo:setup --phase=build` trước khi build image không.
+- Plugin/theme có `setup.yaml` nên khai báo `checks` cho từng command. Preflight sẽ gọi `php artisan hippo:setup --phase=build --scope=local --check --no-prompt` để biết setup local đã tạo đủ file/folder cần thiết hay chưa. Đây là các artifact nằm trong source local như `plugins/`, `themes/`, `modules/`, `public/` và sẽ được copy vào image. Nếu thiếu checks, preflight sẽ hỏi có muốn chạy `php artisan hippo:setup --phase=build --scope=local` trước khi build image không.
+- Artifact chỉ tồn tại sau khi Docker build chạy `composer install`, ví dụ file trong `vendor/`, phải dùng `scope=image`. Những command này không xuất hiện trong preflight local; Dockerfile sẽ chạy và check chúng trong quá trình build image.
 
 Ví dụ `setup.yaml`:
 
@@ -388,6 +389,13 @@ php artisan hippo:setup --only=publish-ckfinder-assets
 
 ```bash
 php artisan hippo:setup --phase=build --fresh
+```
+
+Một số setup phải chạy bên trong Docker image sau khi `composer install`, ví dụ `ckfinder:download` vì file được tạo trong `vendor/`. Các command này dùng `scope=image` và Dockerfile sẽ chạy:
+
+```bash
+php artisan hippo:setup --phase=build --scope=image --no-prompt
+php artisan hippo:setup --phase=build --scope=image --check --no-prompt
 ```
 
 Lưu ý với theme dùng Vite/npm workspace:
@@ -444,6 +452,8 @@ Build + push release:
 ```bash
 ./scripts/release.sh 1.0.0
 ```
+
+Trước khi push lên Harbor, script sẽ hỏi xác nhận. Nhấn Enter để tiếp tục, nhập `n` hoặc `q` để dừng. Nếu không nhập gì trong 60 giây, script tự tiếp tục push.
 
 Tùy chọn:
 

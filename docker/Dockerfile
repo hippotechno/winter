@@ -108,6 +108,21 @@ RUN --mount=type=secret,id=github_token,required=false set -eux; \
         sleep 10; \
     done; \
     [ "$attempt" -le 5 ]; \
+    mkdir -p \
+        storage/framework/cache \
+        storage/framework/sessions \
+        storage/framework/testing \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache; \
+    php artisan hippo:setup --phase=build --scope=image --no-prompt; \
+    composer dump-autoload \
+        --no-dev \
+        --classmap-authoritative \
+        --no-interaction \
+        --no-progress; \
+    php -r "require 'vendor/autoload.php'; if (!class_exists('CKSource\\\\CKFinder\\\\CKFinder')) { fwrite(STDERR, 'CKFinder connector class is not autoloadable.'.PHP_EOL); exit(1); }"; \
+    php artisan hippo:setup --phase=build --scope=image --check --no-prompt; \
     if [ "$PRUNE_DEV_ARTIFACTS" = "true" ]; then \
         find /var/www/html/modules /var/www/html/plugins /var/www/html/themes /var/www/html/vendor \
             -type d \( -name .git -o -name .github -o -name .gitlab -o -name tests -o -name test -o -name __tests__ -o -name docs \) \
