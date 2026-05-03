@@ -98,9 +98,9 @@ themes:
     - folder: wn-tombo-theme
       repo: git@github.com:hippotechno/wn-tombo-theme.git
       branch: main
-    - folder: sas-sas-21
+    - folder: wn-sas-theme
       repo: git@github.com:hippotechno/wn-sas-theme.git
-      branch: main
+      branch: dev
     - folder: oc-theme-bumen-17
       repo: git@github.com:silver-arrow-software/oc-theme-bumen-17.git
       branch: main
