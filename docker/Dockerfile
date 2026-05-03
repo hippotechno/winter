@@ -3,13 +3,16 @@
 ARG PHP_IMAGE=php:8.3-apache-bookworm
 ARG BUILD_DATE=unknown
 ARG VCS_REF=unknown
+ARG IMAGE_VERSION=unknown
 
 FROM ${PHP_IMAGE} AS php-base
 ARG BUILD_DATE
 ARG VCS_REF
+ARG IMAGE_VERSION
 
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
-    org.opencontainers.image.revision="${VCS_REF}"
+    org.opencontainers.image.revision="${VCS_REF}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}"
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html \
     APP_ENV=production \
@@ -71,6 +74,9 @@ WORKDIR /var/www/html
 
 FROM php-base AS deps
 ARG PRUNE_DEV_ARTIFACTS=true
+ARG BUILD_DATE
+ARG VCS_REF
+ARG IMAGE_VERSION
 
 COPY artisan composer.json composer.lock index.php .htaccess /var/www/html/
 COPY bootstrap /var/www/html/bootstrap
@@ -80,6 +86,11 @@ RUN cp /var/www/html/config/hippo/core/config.example.php /var/www/html/config/h
 COPY modules /var/www/html/modules
 COPY plugins /var/www/html/plugins
 COPY themes /var/www/html/themes
+
+RUN set -eux; \
+    plugin_sha256="$(sha256sum /var/www/html/plugins/hippo/core/Plugin.php | awk '{print $1}')"; \
+    printf 'IMAGE_VERSION=%s\nBUILD_DATE=%s\nVCS_REF=%s\nHIPPO_CORE_PLUGIN_SHA256=%s\n' \
+        "$IMAGE_VERSION" "$BUILD_DATE" "$VCS_REF" "$plugin_sha256" > /var/www/html/.build-info
 
 RUN --mount=type=secret,id=github_token,required=false set -eux; \
     set +x; \
@@ -119,8 +130,7 @@ RUN --mount=type=secret,id=github_token,required=false set -eux; \
     composer dump-autoload \
         --no-dev \
         --classmap-authoritative \
-        --no-interaction \
-        --no-progress; \
+        --no-interaction; \
     php -r "require 'vendor/autoload.php'; if (!class_exists('CKSource\\\\CKFinder\\\\CKFinder')) { fwrite(STDERR, 'CKFinder connector class is not autoloadable.'.PHP_EOL); exit(1); }"; \
     php artisan hippo:setup --phase=build --scope=image --check --no-prompt; \
     if [ "$PRUNE_DEV_ARTIFACTS" = "true" ]; then \
@@ -137,10 +147,12 @@ RUN --mount=type=secret,id=github_token,required=false set -eux; \
 FROM ${PHP_IMAGE} AS runtime
 ARG BUILD_DATE
 ARG VCS_REF
+ARG IMAGE_VERSION
 ARG INCLUDE_SEED_ASSETS=false
 
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
-    org.opencontainers.image.revision="${VCS_REF}"
+    org.opencontainers.image.revision="${VCS_REF}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}"
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html \
     APP_ENV=production \

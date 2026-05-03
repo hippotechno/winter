@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6]
+
+### Added
+
+- Add `/var/www/html/.build-info` to runtime images with `IMAGE_VERSION`, `BUILD_DATE`, `VCS_REF`, and the Hippo.Core `Plugin.php` SHA-256 for server-side verification.
+- Print version and latest image digests at the end of `scripts/release.sh`.
+
+### Fixed
+
+- Rebuild Composer autoload after image-scoped setup commands so generated vendor classes such as CKFinder connector classes are autoloadable in production images.
+- Create WinterCMS runtime cache/storage directories before running artisan setup commands during Docker build.
+- Remove the unsupported `--no-progress` option from `composer dump-autoload`.
+
 ## [1.0.5]
 
 ### Added

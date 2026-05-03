@@ -147,6 +147,13 @@ print_manifest_sizes() {
   done <<< "$index_lines"
 }
 
+get_image_digest() {
+  local image_ref="$1"
+
+  docker buildx imagetools inspect "$image_ref" 2>/dev/null \
+    | awk '/^Digest:/ {print $2; exit}'
+}
+
 if [[ $# -lt 1 ]]; then
   usage
   exit 1
@@ -306,6 +313,7 @@ BUILD_CMD=(
   --push
   --build-arg "BUILD_DATE=$BUILD_DATE"
   --build-arg "VCS_REF=$VCS_REF"
+  --build-arg "IMAGE_VERSION=$VERSION"
   --build-arg "INCLUDE_SEED_ASSETS=$INCLUDE_SEED_ASSETS"
 )
 if [[ -n "${GITHUB_TOKEN:-}" ]]; then
@@ -320,11 +328,23 @@ log_info "==> Inspect manifest: $VERSION_TAG"
 docker buildx imagetools inspect "$VERSION_TAG" || true
 print_manifest_sizes "$VERSION_TAG"
 
+VERSION_DIGEST="$(get_image_digest "$VERSION_TAG" || true)"
+LATEST_DIGEST=""
+if [[ "$PUSH_LATEST" == "true" ]]; then
+  LATEST_DIGEST="$(get_image_digest "$LATEST_TAG" || true)"
+fi
+
 echo
 log_success "Release hoàn tất"
 echo "- Version: $VERSION_TAG"
+if [[ -n "$VERSION_DIGEST" ]]; then
+  echo "- Version digest: $VERSION_DIGEST"
+fi
 if [[ "$PUSH_LATEST" == "true" ]]; then
   echo "- Latest : $LATEST_TAG"
+  if [[ -n "$LATEST_DIGEST" ]]; then
+    echo "- Latest digest : $LATEST_DIGEST"
+  fi
 fi
 echo "- Platforms: $PLATFORMS"
 echo "- Include seed assets: $INCLUDE_SEED_ASSETS"
