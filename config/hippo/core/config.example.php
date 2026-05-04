@@ -4,17 +4,22 @@ return [
     'enable_multisite' => true,
     'sites' => [
         [
+            'host' => 'www.tulutala.com',
+            'theme' => 'hippo-default-theme',
+            'skin' => 'uikit',
+        ],
+        [
+            'host' => 'www.tuimuon.xyz',
+            'theme' => 'hippo-default-theme',
+            'skin' => 'uikit',
+        ],
+        [
             'host' => 'vn.sbitdev.kr',
             'theme' => 'wn-gaion-theme',
         ],
         [
             'host' => 'www.muitenbac.com',
             'theme' => 'wn-sas-theme',
-        ],
-        [
-            'host' => 'www.tulutala.com',
-            'theme' => 'hippo-default-theme',
-            'skin' => 'uikit',
         ],
         [
             'host' => 'www.boardgame360.com',

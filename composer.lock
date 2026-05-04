@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d46dbb8839f504261fb333471da5189c",
+    "content-hash": "7aa63cf941383a7dc09c47180452eeb2",
     "packages": [
         {
             "name": "antwerpes/data-transfer-object",
@@ -14266,77 +14266,6 @@
             "time": "2026-02-20T20:52:05+00:00"
         },
         {
-            "name": "winter/wn-backend-module",
-            "version": "v1.2.12",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wintercms/wn-backend-module.git",
-                "reference": "8a0e2d1e5d08618a2f6322a3f9e961c2c4855858"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wintercms/wn-backend-module/zipball/8a0e2d1e5d08618a2f6322a3f9e961c2c4855858",
-                "reference": "8a0e2d1e5d08618a2f6322a3f9e961c2c4855858",
-                "shasum": ""
-            },
-            "require": {
-                "composer/installers": "~1.11.0",
-                "laravel/framework": "^9.1",
-                "php": ">=8.1"
-            },
-            "replace": {
-                "october/backend": "1.1.*"
-            },
-            "type": "winter-module",
-            "autoload": {
-                "psr-4": {
-                    "Backend\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Alexey Bobkov",
-                    "email": "aleksey.bobkov@gmail.com",
-                    "role": "Original Author"
-                },
-                {
-                    "name": "Samuel Georges",
-                    "email": "daftspunky@gmail.com",
-                    "role": "Original Author"
-                },
-                {
-                    "name": "Luke Towers",
-                    "email": "wintercms@luketowers.ca",
-                    "role": "Lead Maintainer"
-                }
-            ],
-            "description": "Backend module for Winter CMS",
-            "homepage": "https://wintercms.com",
-            "keywords": [
-                "backend",
-                "winter",
-                "winter cms"
-            ],
-            "support": {
-                "source": "https://github.com/wintercms/wn-backend-module/tree/v1.2.12"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/wintercms",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/wintercms",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2026-02-20T09:00:48+00:00"
-        },
-        {
             "name": "winter/wn-blocks-plugin",
             "version": "dev-main",
             "source": {
@@ -14393,77 +14322,6 @@
                 }
             ],
             "time": "2026-02-11T20:31:38+00:00"
-        },
-        {
-            "name": "winter/wn-cms-module",
-            "version": "v1.2.12",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wintercms/wn-cms-module.git",
-                "reference": "793140aec6bc2463c80f9fc865f95f17ec60365d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wintercms/wn-cms-module/zipball/793140aec6bc2463c80f9fc865f95f17ec60365d",
-                "reference": "793140aec6bc2463c80f9fc865f95f17ec60365d",
-                "shasum": ""
-            },
-            "require": {
-                "composer/installers": "~1.11.0",
-                "laravel/framework": "^9.1",
-                "php": ">=8.1"
-            },
-            "replace": {
-                "october/cms": "1.1.*"
-            },
-            "type": "winter-module",
-            "autoload": {
-                "psr-4": {
-                    "Cms\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Alexey Bobkov",
-                    "email": "aleksey.bobkov@gmail.com",
-                    "role": "Original Author"
-                },
-                {
-                    "name": "Samuel Georges",
-                    "email": "daftspunky@gmail.com",
-                    "role": "Original Author"
-                },
-                {
-                    "name": "Luke Towers",
-                    "email": "wintercms@luketowers.ca",
-                    "role": "Lead Maintainer"
-                }
-            ],
-            "description": "CMS module for Winter CMS",
-            "homepage": "https://wintercms.com",
-            "keywords": [
-                "cms",
-                "winter",
-                "winter cms"
-            ],
-            "support": {
-                "source": "https://github.com/wintercms/wn-cms-module/tree/v1.2.12"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/wintercms",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/wintercms",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2026-02-20T09:01:39+00:00"
         },
         {
             "name": "winter/wn-location-plugin",
@@ -14536,78 +14394,6 @@
                 }
             ],
             "time": "2025-07-23T16:46:50+00:00"
-        },
-        {
-            "name": "winter/wn-system-module",
-            "version": "v1.2.12",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wintercms/wn-system-module.git",
-                "reference": "8f0c4daac6cca3264583b234aa1062fa4a93c9df"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wintercms/wn-system-module/zipball/8f0c4daac6cca3264583b234aa1062fa4a93c9df",
-                "reference": "8f0c4daac6cca3264583b234aa1062fa4a93c9df",
-                "shasum": ""
-            },
-            "require": {
-                "composer/installers": "~1.11.0",
-                "composer/semver": "^3.2",
-                "laravel/framework": "^9.1",
-                "php": ">=8.1"
-            },
-            "replace": {
-                "october/system": "1.1.*"
-            },
-            "type": "winter-module",
-            "autoload": {
-                "psr-4": {
-                    "System\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Alexey Bobkov",
-                    "email": "aleksey.bobkov@gmail.com",
-                    "role": "Original Author"
-                },
-                {
-                    "name": "Samuel Georges",
-                    "email": "daftspunky@gmail.com",
-                    "role": "Original Author"
-                },
-                {
-                    "name": "Luke Towers",
-                    "email": "wintercms@luketowers.ca",
-                    "role": "Lead Maintainer"
-                }
-            ],
-            "description": "System module for Winter CMS",
-            "homepage": "https://wintercms.com",
-            "keywords": [
-                "system",
-                "winter",
-                "winter cms"
-            ],
-            "support": {
-                "source": "https://github.com/wintercms/wn-system-module/tree/v1.2.12"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/wintercms",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/wintercms",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2026-02-20T08:37:49+00:00"
         },
         {
             "name": "winter/wn-translate-plugin",

@@ -6,6 +6,7 @@ composer.phar
 .env
 .env.local
 docker/.env.runtime
+docker/.env.local
 .env.*.php
 .env.php
 selenium.php
@@ -47,3 +48,9 @@ public
 
 # Theme using Vite
 .vite-packages.production
+
+# Runtime secret files
+/secrets/*
+!/secrets/.gitignore
+!/secrets/.gitkeep
+!/secrets/README.md

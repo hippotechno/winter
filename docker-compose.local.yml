@@ -22,16 +22,16 @@ services:
       - "80"
     extra_hosts:
       - "storage.tuimuon.xyz:171.235.163.107"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+    networks:
+      - default
+      - external_backend
     volumes:
       - ${APP_CODE_PATH:-.}:/var/www/html:cached
       - winter_cache:/var/www/html/bootstrap/cache
 
   postgres:
+    profiles:
+      - local-postgres
     image: postgres:17-alpine
     container_name: ${DB_CONTAINER_NAME:-winter-pg-local}
     restart: unless-stopped
@@ -51,6 +51,8 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   redis:
+    profiles:
+      - local-redis
     image: redis:7-alpine
     container_name: ${REDIS_CONTAINER_NAME:-winter-redis-local}
     restart: unless-stopped
@@ -74,6 +76,9 @@ services:
       - .env
     depends_on:
       - winter-app
+    networks:
+      - default
+      - external_backend
     ports:
       - "${BIND_IP:-127.0.0.1}:${HTTP_BIND_PORT:-80}:80"
       - "${BIND_IP:-127.0.0.1}:${HTTPS_BIND_PORT:-443}:443"
@@ -92,3 +97,8 @@ volumes:
   redis_data:
   caddy_data:
   caddy_config:
+
+networks:
+  external_backend:
+    name: ${LOCAL_EXTERNAL_NETWORK_NAME:-my_wintercms_external_backend}
+    external: ${LOCAL_EXTERNAL_NETWORK_EXTERNAL:-false}

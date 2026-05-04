@@ -299,9 +299,7 @@ require_dockerignore "config/hippo/core/config.php"
 require_dockerignore "config/hippo/core/ckfinder.php"
 require_dockerignore "vendor"
 require_dockerignore "storage"
-require_dockerignore "**/.git"
 require_dockerignore "**/node_modules"
-require_dockerignore "**/docs"
 
 if [[ -f "$MANIFEST_FILE" ]]; then
     missing_repos=()

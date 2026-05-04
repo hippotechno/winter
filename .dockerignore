@@ -1,17 +1,11 @@
-.git
 .github
 .idea
 .vscode
 node_modules
-**/.git
 **/.github
 **/.idea
 **/.vscode
 **/node_modules
-**/tests
-**/test
-**/__tests__
-**/docs
 **/*.map
 **/*.psd
 **/*.ai
@@ -24,3 +18,7 @@ bootstrap/cache
 config/hippo/core/config.php
 config/hippo/core/ckfinder.php
 docker-compose*.yml
+secrets/*
+!secrets/.gitignore
+!secrets/.gitkeep
+!secrets/README.md

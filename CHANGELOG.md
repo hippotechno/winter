@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8]
+
+### Added
+
+- Add `scripts/release-dev.sh` for pushing dev images that keep `.git`, docs, and tests for shell-based development.
+- Add a local-only `secrets/` folder placeholder with ignore rules so secret files stay out of Git and Docker build context.
+- Add `scripts/local-compose.sh` to run local Docker Compose and convert `docker/.env.local` service toggles into Compose profiles.
+- Add `docker/.env.local.example` so Docker-local settings are separated from app `.env`.
+
+### Changed
+
+- Copy local `modules/` after Composer install during Docker build so WinterCMS module packages cannot overwrite local core changes.
+- Treat `modules/backend`, `modules/cms`, and `modules/system` as skeleton-owned source by replacing the Composer module packages and autoloading them from root `composer.json`.
+- Install `git` and `openssh-client` in dev images so `winter:util git pull` can run inside server containers.
+- Keep docs and tests in the Docker build context; production images still prune them, while dev images can retain them for shell-based work.
+- Register copied Git repositories as safe directories in dev images so server-side `winter:util git pull` is not blocked by Git ownership checks.
+- Build dev images from a dedicated `dev-runtime` target that includes the root `.git` directory, allowing root skeleton/module changes to be pulled inside server containers.
+- Remove hard `winter-app` dependency on bundled Postgres/Redis in local Compose so app/web can run against external services.
+- Allow local Postgres/Redis services to be enabled or disabled from `docker/.env.local` using `LOCAL_ENABLE_POSTGRES` and `LOCAL_ENABLE_REDIS`.
+- Attach local app/web containers to a configurable external Docker network for external Postgres/Redis access.
+- Move Docker-only local variables such as bind ports, container names, and service toggles out of `.env.example`.
+
 ## [1.0.7]
 
 ### Changed
@@ -15,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `/var/www/html/.build-info` to runtime images with `IMAGE_VERSION`, `BUILD_DATE`, `VCS_REF`, and the Hippo.Core `Plugin.php` SHA-256 for server-side verification.
+- Add `/var/www/html/.build-info` to runtime images with `IMAGE_VERSION`, `BUILD_DATE`, and `VCS_REF` for server-side verification.
 - Print version and latest image digests at the end of `scripts/release.sh`.
 
 ### Fixed

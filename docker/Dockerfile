@@ -4,6 +4,7 @@ ARG PHP_IMAGE=php:8.3-apache-bookworm
 ARG BUILD_DATE=unknown
 ARG VCS_REF=unknown
 ARG IMAGE_VERSION=unknown
+ARG PRUNE_DEV_ARTIFACTS=true
 
 FROM ${PHP_IMAGE} AS php-base
 ARG BUILD_DATE
@@ -73,7 +74,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 WORKDIR /var/www/html
 
 FROM php-base AS deps
-ARG PRUNE_DEV_ARTIFACTS=true
+ARG PRUNE_DEV_ARTIFACTS
 ARG BUILD_DATE
 ARG VCS_REF
 ARG IMAGE_VERSION
@@ -83,14 +84,8 @@ COPY bootstrap /var/www/html/bootstrap
 COPY config /var/www/html/config
 RUN cp /var/www/html/config/hippo/core/config.example.php /var/www/html/config/hippo/core/config.php \
     && cp /var/www/html/config/hippo/core/ckfinder.example.php /var/www/html/config/hippo/core/ckfinder.php
-COPY modules /var/www/html/modules
 COPY plugins /var/www/html/plugins
 COPY themes /var/www/html/themes
-
-RUN set -eux; \
-    plugin_sha256="$(sha256sum /var/www/html/plugins/hippo/core/Plugin.php | awk '{print $1}')"; \
-    printf 'IMAGE_VERSION=%s\nBUILD_DATE=%s\nVCS_REF=%s\nHIPPO_CORE_PLUGIN_SHA256=%s\n' \
-        "$IMAGE_VERSION" "$BUILD_DATE" "$VCS_REF" "$plugin_sha256" > /var/www/html/.build-info
 
 RUN --mount=type=secret,id=github_token,required=false set -eux; \
     set +x; \
@@ -119,6 +114,17 @@ RUN --mount=type=secret,id=github_token,required=false set -eux; \
         sleep 10; \
     done; \
     [ "$attempt" -le 5 ]; \
+    rm -f /root/.composer/auth.json; \
+    rm -rf /root/.composer/cache
+
+RUN rm -rf /var/www/html/modules /var/www/html/plugins /var/www/html/themes
+COPY modules /var/www/html/modules
+COPY plugins /var/www/html/plugins
+COPY themes /var/www/html/themes
+
+RUN set -eux; \
+    printf 'IMAGE_VERSION=%s\nBUILD_DATE=%s\nVCS_REF=%s\n' \
+        "$IMAGE_VERSION" "$BUILD_DATE" "$VCS_REF" > /var/www/html/.build-info; \
     mkdir -p \
         storage/framework/cache \
         storage/framework/sessions \
@@ -126,6 +132,10 @@ RUN --mount=type=secret,id=github_token,required=false set -eux; \
         storage/framework/views \
         storage/logs \
         bootstrap/cache; \
+    composer dump-autoload \
+        --no-dev \
+        --classmap-authoritative \
+        --no-interaction; \
     php artisan hippo:setup --phase=build --scope=image --no-prompt; \
     composer dump-autoload \
         --no-dev \
@@ -140,15 +150,14 @@ RUN --mount=type=secret,id=github_token,required=false set -eux; \
         find /var/www/html/modules /var/www/html/plugins /var/www/html/themes /var/www/html/vendor \
             -type f \( -name '*.map' -o -name '*.psd' -o -name '*.ai' -o -name '*.sketch' \) \
             -delete; \
-    fi; \
-    rm -f /root/.composer/auth.json; \
-    rm -rf /root/.composer/cache
+    fi
 
 FROM ${PHP_IMAGE} AS runtime
 ARG BUILD_DATE
 ARG VCS_REF
 ARG IMAGE_VERSION
 ARG INCLUDE_SEED_ASSETS=false
+ARG PRUNE_DEV_ARTIFACTS=true
 
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
     org.opencontainers.image.revision="${VCS_REF}" \
@@ -169,6 +178,7 @@ RUN printf 'Acquire::Retries "5";\nAcquire::ForceIPv4 "true";\n' > /etc/apt/apt.
         libpng16-16 \
         libjpeg62-turbo \
         libfreetype6 \
+        $(if [ "$PRUNE_DEV_ARTIFACTS" != "true" ]; then echo "git openssh-client"; fi) \
     && a2enmod rewrite headers \
     && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" \
         /etc/apache2/sites-available/*.conf \
@@ -190,6 +200,13 @@ RUN if [ "$INCLUDE_SEED_ASSETS" != "true" ]; then \
         find /var/www/html/plugins -mindepth 3 -maxdepth 3 -type d -name seed -prune -exec rm -rf '{}' +; \
     fi
 
+RUN if [ "$PRUNE_DEV_ARTIFACTS" != "true" ]; then \
+        git config --system --add safe.directory /var/www/html; \
+        find /var/www/html/modules /var/www/html/plugins /var/www/html/themes \
+            -type d -name .git -prune \
+            -exec sh -c 'git config --system --add safe.directory "$(dirname "$1")"' _ '{}' \; ; \
+    fi
+
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
@@ -199,6 +216,10 @@ RUN chmod +x /usr/local/bin/winter-entrypoint
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/winter-entrypoint"]
+
+FROM runtime AS dev-runtime
+
+COPY .git /var/www/html/.git
 
 FROM runtime AS local
 
