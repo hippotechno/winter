@@ -5,5 +5,14 @@
 {$APP_DOMAIN}, *.{$APP_DOMAIN} {
     tls internal
     encode zstd gzip
+
+    handle_path /ws/* {
+        reverse_proxy host.docker.internal:6001
+    }
+
+    handle /apps/* {
+        reverse_proxy host.docker.internal:6001
+    }
+
     reverse_proxy winter-app:80
 }

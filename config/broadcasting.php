@@ -30,18 +30,31 @@ return [
 
     'connections' => [
         'pusher' => [
-            'app_id' => env('PUSHER_APP_ID'),
-            'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
-            ],
             'driver' => 'pusher',
             'key' => env('PUSHER_APP_KEY'),
-            'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => true,
-            ],
             'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'options' => [
+                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
+                'useTLS'  => env('PUSHER_SERVER_USE_TLS', env('PUSHER_USE_TLS', false)),
+                'host'    => env('PUSHER_SERVER_HOST', env('PUSHER_HOST', '127.0.0.1')),
+                'port'    => env('PUSHER_SERVER_PORT', env('PUSHER_PORT', 6001)),
+                'scheme'  => env('PUSHER_SERVER_SCHEME', env('PUSHER_SCHEME', 'http')),
+            ],
         ],
+        // 'pusher' => [
+        //     'app_id' => env('PUSHER_APP_ID'),
+        //     'client_options' => [
+        //         // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+        //     ],
+        //     'driver' => 'pusher',
+        //     'key' => env('PUSHER_APP_KEY'),
+        //     'options' => [
+        //         'cluster' => env('PUSHER_APP_CLUSTER'),
+        //         'useTLS' => true,
+        //     ],
+        //     'secret' => env('PUSHER_APP_SECRET'),
+        // ],
         'ably' => [
             'driver' => 'ably',
             'key' => env('ABLY_KEY'),

@@ -101,11 +101,12 @@ Ghi chú: nếu `APP_KEY` đang trống thì làm theo phần `Nâng cao: Chạy
 - Docker + Docker Compose
 - PostgreSQL (local)
 - Redis (cache/session/queue)
+- Queue worker (local, dùng cho notification/event async)
 - Caddy (reverse proxy HTTPS local)
 
 ## File Docker chính
 
-- `docker-compose.local.yml`: chạy local (app + postgres + redis + caddy)
+- `docker-compose.local.yml`: chạy local (app + queue worker + postgres + redis + caddy)
 - `docker-compose.runtime.yml`: chạy server/runtime từ image đã build (chỉ app)
 - `docker/Dockerfile`: image app
 - `docker/entrypoint.sh`: entrypoint app
@@ -154,6 +155,7 @@ Trong `.env`, cần kiểm tra tối thiểu:
 Trong `docker/.env.local`, cần kiểm tra tối thiểu:
 
 - `LOCAL_ENABLE_POSTGRES`, `LOCAL_ENABLE_REDIS`
+- `LOCAL_ENABLE_QUEUE_WORKER`
 - `LOCAL_EXTERNAL_NETWORK_NAME`, `LOCAL_EXTERNAL_NETWORK_EXTERNAL`
 - `HTTP_BIND_PORT`, `HTTPS_BIND_PORT`
 - `DB_EXPOSE_PORT`, `REDIS_EXPOSE_PORT`
@@ -167,6 +169,31 @@ QUEUE_CONNECTION=redis
 REDIS_HOST=redis
 REDIS_PORT=6379
 ```
+
+### Queue worker và realtime notification
+
+Hippo.Notify xử lý notification thật qua queue. Nghĩa là nếu `QUEUE_CONNECTION=redis`, cần có queue worker đang chạy thì notification mới được lưu DB và broadcast WebSocket.
+
+Local Compose đã có service `winter-queue`, bật bằng `docker/.env.local`:
+
+```env
+LOCAL_ENABLE_QUEUE_WORKER=true
+```
+
+Chạy hoặc restart worker:
+
+```bash
+./scripts/local-compose.sh up -d winter-queue
+./scripts/local-compose.sh logs -f winter-queue
+```
+
+Nếu chỉ muốn test nhanh không dùng worker, có thể tạm đặt trong `.env`:
+
+```env
+QUEUE_CONNECTION=sync
+```
+
+Ghi chú: nút test trong Hippo.Notify chạy sync để bấm là thấy kết quả ngay; các event notification thật vẫn đi qua queue.
 
 ### `GITHUB_TOKEN` dùng thế nào
 
@@ -253,6 +280,7 @@ Trong `docker/.env.local`, tắt service bundled và khai báo network external:
 ```env
 LOCAL_ENABLE_POSTGRES=false
 LOCAL_ENABLE_REDIS=false
+LOCAL_ENABLE_QUEUE_WORKER=true
 
 LOCAL_EXTERNAL_NETWORK_NAME=ten_network_co_san
 LOCAL_EXTERNAL_NETWORK_EXTERNAL=true
@@ -301,6 +329,30 @@ DB_HOST=ten_container_postgres_co_san
 ```
 
 Ghi chú: `LOCAL_EXTERNAL_NETWORK_NAME` phải là Docker network mà container Postgres/Redis external đang dùng. Nếu không dùng external service thì giữ mặc định `LOCAL_EXTERNAL_NETWORK_EXTERNAL=false`.
+
+### Dùng Soketi local qua Caddy
+
+Khi chạy Soketi riêng bằng `docker-compose.soketi.yml`, browser nên kết nối qua Caddy HTTPS, còn PHP trong `winter-app` nên gọi thẳng Soketi qua host Docker.
+
+Trong `.env`:
+
+```env
+SOKETI_PORT=6001
+
+BROADCAST_DRIVER=pusher
+PUSHER_HOST=tulutala-local.test
+PUSHER_PORT=443
+PUSHER_SCHEME=https
+PUSHER_USE_TLS=true
+PUSHER_WS_PATH=/ws
+
+PUSHER_SERVER_HOST=host.docker.internal
+PUSHER_SERVER_PORT=6001
+PUSHER_SERVER_SCHEME=http
+PUSHER_SERVER_USE_TLS=false
+```
+
+`PUSHER_HOST` dùng cho browser. `PUSHER_SERVER_HOST` dùng cho Laravel/PHP khi gửi event sang Soketi. Không dùng `PUSHER_HOST=tulutala-local.test` cho server-side trong container vì domain local có thể resolve về `127.0.0.1` bên trong `winter-app`.
 
 ### Bước 5: tạo APP_KEY cho `.env` (nếu đang trống)
 

@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow local Postgres/Redis services to be enabled or disabled from `docker/.env.local` using `LOCAL_ENABLE_POSTGRES` and `LOCAL_ENABLE_REDIS`.
 - Attach local app/web containers to a configurable external Docker network for external Postgres/Redis access.
 - Move Docker-only local variables such as bind ports, container names, and service toggles out of `.env.example`.
+- Route local Caddy `/ws/*` and `/apps/*` requests to Soketi, stripping the `/ws` prefix before proxying WebSocket traffic.
+- Add `PUSHER_SERVER_*` env support so Laravel can call Soketi directly while the browser connects through the public/local Caddy host.
 
 ## [1.0.7]
 

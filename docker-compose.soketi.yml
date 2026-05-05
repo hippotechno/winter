@@ -1,0 +1,19 @@
+name: tulutala-soketi
+
+services:
+  soketi:
+    image: quay.io/soketi/soketi:1.4-16-alpine
+    ports:
+      - '${SOKETI_PORT:-6001}:6001'
+    environment:
+      SOKETI_DEFAULT_APP_ID: '${SOKETI_APP_ID:-hippo-app}'
+      SOKETI_DEFAULT_APP_KEY: '${SOKETI_APP_KEY:-hippo-key}'
+      SOKETI_DEFAULT_APP_SECRET: '${SOKETI_APP_SECRET:-hippo-secret}'
+      SOKETI_DEFAULT_APP_NAME: 'hippo'
+      SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES: 'false'
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:6001"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
